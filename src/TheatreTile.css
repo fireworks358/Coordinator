@@ -1,93 +1,136 @@
 /* --- Global Styling for the Figma Look --- */
 body {
-    background-color: #121212; 
-    color: #f0f0f0; 
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* --- Tile Structure (Slightly Smaller) --- */
+/* --- Tile Structure (Responsive) --- */
 .theatre-tile {
-    width: 160px; /* Reduced from 220px */
-    min-width: 160px; 
-    height: 220px; /* Reduced from 150px */
-    padding: 8px 15px; 
+    width: 140px;
+    min-width: 140px;
+    height: 140px;
+    padding: 6px 12px;
+    padding-bottom: 40px; /* added space for bottom-right button */
     margin: 10px;
-    border-radius: 10px; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); 
+    border-radius: 10px;
+    box-shadow: 0 4px 10px var(--shadow-tile);
     transition: transform 0.1s ease-in-out;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+}
+
+/* Scale up for 1920x1080 and larger screens - adjusted to maintain 11 columns */
+/* Calculation:
+   - Available width: 1920px - 20px (container left padding) - 20px (container right padding) = 1880px
+   - 11 tiles per row
+   - 1880px / 11 = 170.9px per tile
+   - Tile: 140px width + 2*15.45px margin = 170.9px total
+*/
+@media (min-width: 1920px) {
+    .theatre-tile {
+        width: 140px;
+        min-width: 140px;
+        height: 145px;
+        padding: 6px 5px;
+        padding-bottom: 36px; /* keep space on large screens */
+        margin-left: 9px;
+        margin-bottom: 0px;
+    }
 }
 
 .theatre-tile:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 8px 15px var(--shadow-tile-hover);
     opacity: 0.98;
 }
 
 /* --- Colour States --- */
-.theatre-tile.neutral { background-color: #333333; color: #aaaaaa; }
-.theatre-tile.complete { background-color: #3b543c; color: #e8f5e9; } 
-.theatre-tile.on-time-green { background-color: #069C56; color: #1a1a1a; } 
-.theatre-tile.mid-risk-orange { background-color: #E29A28; color: #1a1a1a; } 
-.theatre-tile.high-risk-red { background-color: #D3212C; color: white; } 
+.theatre-tile.neutral {
+    background-color: var(--bg-tile-neutral);
+    color: var(--text-muted);
+}
+.theatre-tile.complete {
+    background-color: #3b543c;
+    color: #e8f5e9;
+}
+.theatre-tile.on-time-green {
+    background-color: #069c97;
+    color: #dddddd;
+}
+.theatre-tile.mid-risk-orange {
+    background-color: #E29A28;
+    color: #1a1a1a;
+}
+.theatre-tile.high-risk-red {
+    background-color: #D3212C;
+    color: white;
+} 
 
 
 /* --- Header and Content Details --- */
 .header {
     display: flex;
     justify-content: space-between;
-    font-weight: 600; 
-    margin-bottom: 5px;
+    font-weight: 600;
+    margin-bottom: 0px;
 }
 
 .theatre-name {
-    font-size: 1.2em; 
-    letter-spacing: 0.5px;
+    font-size: 1.4em;
+    letter-spacing: 0.3px;
 }
 
 .eta {
-    font-size: 1em;
+    font-size: 0.9em;
+    font-weight: 600;
     opacity: 0.9;
+    text-align: right;
 }
 
 .content {
-    flex-grow: 1; 
-    padding-top: 5px;
+    flex-grow: 1;
+    padding-top: 1px;
 }
 
 .practitioner-info {
     font-weight: bold;
-    font-size: 1.2em; /* Increased ODP Name size */
-    margin: 4px 0 2px 0;
+    font-size: 1.1em;
+    margin: 3px 0 2px 0;
 }
 
 .relief-info {
     font-style: italic;
     opacity: 0.8;
+    font-size: 0.95em;
 }
 
 .unallocated-text {
     text-align: center;
-    padding-top: 15px;
+    padding-top: 10px;
     opacity: 0.6;
+    font-size: 0.95em;
 }
 
 /* --- Complete Toggle Button Styling --- */
 .footer {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .complete-toggle {
-    background-color: rgba(0, 0, 0, 0.2); 
+    background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 0.85em;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 0.7em;
     color: white;
     cursor: pointer;
     transition: all 0.2s;
@@ -110,4 +153,41 @@ body {
 .complete-toggle.not-running {
     background-color: #555555; /* Dark grey for Not Running */
     border-color: #757575;
+}
+
+/* --- Responsive font sizing for 1920x1080 and larger --- */
+@media (min-width: 1920px) {
+    .footer {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .theatre-name {
+        font-size: 1.1em;
+    }
+
+    .eta-bubble {
+        bottom: 4px;
+        right: 4px;
+        padding: 2px 6px;
+        font-size: 0.7em;
+    }
+
+    .practitioner-info {
+        font-size: 1.05em;
+    }
+
+    .relief-info {
+        font-size: 0.8em;
+    }
+
+    .unallocated-text {
+        font-size: 0.9em;
+        padding-top: 8px;
+    }
+
+    .complete-toggle {
+        padding: 2px 6px;
+        font-size: 0.65em;
+    }
 }

@@ -5,48 +5,48 @@ import './TheatreDashboard.css';
 
 // --- INITIAL DATA DEFINITIONS (UNCHANGED) ---
 const initialTheatreData = [
-    { name: 'Theatre E1', currentOdp: 'M Varghese', theatreEta: '18:15', practitionerEndTime: '17:30', nextPractitioner: 'K Bovis', status: 'Running'},
-    { name: 'Theatre E2', currentOdp: 'K Bovis', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Complete'},
-    { name: 'Theatre E3', currentOdp: 'T Simons', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Complete'},
-    { name: 'Theatre E4', currentOdp: 'A Joshy', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Theatre E5', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'}, 
-    { name: 'Theatre E6', currentOdp: 'A Stockley', theatreEta: '19:30', practitionerEndTime: '17:30', nextPractitioner: 'G Morran', status: 'Running'},
-    { name: 'Theatre E7', currentOdp: 'G Morran', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'R Ramachandran', status: 'Running'},
-    { name: 'Theatre E8', currentOdp: 'R Ramachandran', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'C Finan', status: 'Running'},
-    { name: 'Theatre E9', currentOdp: 'C Finan', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'T Eason', status: 'Running'},
-    { name: 'Theatre E10', currentOdp: 'T Eason', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'A Salt', status: 'Running'},
-    { name: 'Theatre E11', currentOdp: 'A Salt', theatreEta: '18:30', practitionerEndTime: '17:30', nextPractitioner: 'J Mower', status: 'Running'},
-    { name: 'Theatre E12', currentOdp: 'J Mower', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'K Innes', status: 'Running'},
-    { name: 'CEEPOD 2 / E13', currentOdp: 'K Innes', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'H Lee', status: 'Running'},
-    { name: 'CEEPOD 3 / E14', currentOdp: 'H Lee', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'M Santos', status: 'Running'},
-    { name: 'Theatre E15', currentOdp: 'M Santos', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Theatre E16', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'}, 
-    { name: 'Trauma 1 / E17', currentOdp: 'S Adny', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'M Beenby', status: 'Running'},
-    { name: 'Trauma 2 / E18', currentOdp: 'M Beenby', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'A Biju', status: 'Running'},
-    { name: 'Theatre E19', currentOdp: 'A Biju', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'R Whiling', status: 'Running'},
-    { name: 'Theatre E20', currentOdp: 'R Whiling', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'S Harper', status: 'Running'},
-    { name: 'Theatre E21', currentOdp: 'S Harper', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'G Noube', status: 'Running'},
-    { name: 'Theatre E22', currentOdp: 'G Noube', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'J Harman', status: 'Running'},
-    { name: 'Theatre D1', currentOdp: 'J Harman', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'D Moore', status: 'Running'},
-    { name: 'Theatre D2', currentOdp: 'D Moore', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'N Rahman', status: 'Running'},
-    { name: 'Theatre D3', currentOdp: 'N Rahman', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'R Fernandez', status: 'Running'},
-    { name: 'Theatre D4', currentOdp: 'R Fernandez', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'R Moore', status: 'Running'},
-    { name: 'Theatre D5', currentOdp: 'R Moore', theatreEta: '19:00', practitionerEndTime: '17:30', nextPractitioner: 'M Franklin', status: 'Running'}, 
-    { name: 'Theatre D6', currentOdp: 'M Franklin', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'J Bugler', status: 'Running'},
-    { name: 'Theatre D7', currentOdp: 'J Bugler', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'S Burrow', status: 'Running'},
-    { name: 'Maternity Emergency', currentOdp: 'S Blackwood', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Maternity Elective', currentOdp: 'S Arakhakhan', theatreEta: '18:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Endoscopy', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Interventional Radiology', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'MRI', currentOdp: 'S Prentice', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Cardiology', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Spare', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
-    { name: 'Spare 2', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
+    { name: 'Theatre E1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E8', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E9', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E10', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E11', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E12', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'CEPOD 2 E13', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'CEPOD E14', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E15', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E16', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Trauma 1 / E17', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Trauma 2 / E18', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E19', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E20', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E21', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E22', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre D7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Maternity Emergency', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Maternity Elective', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Endoscopy', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'IR', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'MRI', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Cardiology', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Spare', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Spare 2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
 ];
 
 const defaultPractitioners = [
     { name: 'M Varghese', endTime: '17:30' },
-    { name: 'K Bovis', endTime: '18:00' },
+    { name: 'K Bevis', endTime: '18:00' },
 ];
 
 // --- HELPER FUNCTION FOR LOCAL STORAGE (RESTORED) ---
@@ -69,8 +69,9 @@ const TheatreDashboard = () => {
     // Load state from localStorage on startup (RESTORED)
     const [theatres, setTheatres] = useState(() => getInitialState('theatreData', initialTheatreData));
     const [practitionerList, setPractitionerList] = useState(() => getInitialState('practitionerListData', defaultPractitioners));
-    
-    // Existing States 
+    const [theme, setTheme] = useState(() => getInitialState('theme', 'dark'));
+
+    // Existing States
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTheatre, setSelectedTheatre] = useState(null);
     const [isStaffPanelVisible, setIsStaffPanelVisible] = useState(false);
@@ -93,6 +94,16 @@ const TheatreDashboard = () => {
             console.error("Error saving practitioner list to localStorage:", error);
         }
     }, [practitionerList]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('theme', JSON.stringify(theme));
+            // Apply theme to body element
+            document.body.className = theme === 'light' ? 'light-theme' : 'dark-theme';
+        } catch (error) {
+            console.error("Error saving theme to localStorage:", error);
+        }
+    }, [theme]);
     
 
     // --- DATA EXPORT/IMPORT LOGIC (RESTORED) ---
@@ -328,24 +339,21 @@ const TheatreDashboard = () => {
     return (
         <div className="dashboard-container">
             <div className="main-header">
-                <h1>ODP Coordination Dashboard</h1>
-                <div className="time-display">{getCurrentTime()}</div> 
-                
-                {/* --- Data Control Group (Left Side, NEW) --- */}
+                {/* --- Data Control Group (Left Side) --- */}
                 <div className="data-control-group-left">
                     <div className="csv-upload-container">
                         <label htmlFor="csv-upload" className="upload-label">
                             Upload Staff CSV ⬆️
                         </label>
-                        <input 
-                            type="file" 
-                            id="csv-upload" 
-                            accept=".csv" 
+                        <input
+                            type="file"
+                            id="csv-upload"
+                            accept=".csv"
                             onChange={handleFileUpload}
                         />
                     </div>
 
-                    <button 
+                    <button
                         className="download-data-btn"
                         onClick={handleDownload}
                     >
@@ -356,40 +364,51 @@ const TheatreDashboard = () => {
                         <label htmlFor="data-upload" className="upload-data-label">
                             Upload State ↑
                         </label>
-                        <input 
-                            type="file" 
-                            id="data-upload" 
-                            accept=".json" 
+                        <input
+                            type="file"
+                            id="data-upload"
+                            accept=".json"
                             onChange={handleDataUpload}
                         />
                     </div>
                 </div>
-                {/* --------------------------------------------- */}
 
+                {/* --- Center: Title and Time --- */}
+                <div className="header-content">
+                    <h1>ODP Coordination Dashboard</h1>
+                    <div className="time-display">{getCurrentTime()}</div>
+                </div>
 
                 {/* --- Action Buttons (Right Side) --- */}
-                <button 
-                    className="staff-panel-toggle-btn"
-                    onClick={() => setIsStaffPanelVisible(!isStaffPanelVisible)}
-                >
-                    {isStaffPanelVisible ? 'Hide Staff Overview' : 'Show Staff Overview'}
-                </button>
+                <div className="button-group-right">
+                    <button
+                        className="theme-toggle-btn"
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    >
+                        {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                    </button>
 
-                <button 
-                    className="filter-toggle-btn"
-                    onClick={() => setShowAll(!showAll)}
-                >
-                    {showAll ? 'Show Only Running' : 'Show All Theatres'} 
-                </button>
-                
-                <button 
-                    className="clear-all-btn"
-                    onClick={handleClearAll}
-                >
-                    Clear ALL Tiles
-                </button>
-                {/* ------------------------------------------- */}
+                    <button
+                        className="clear-all-btn"
+                        onClick={handleClearAll}
+                    >
+                        Clear ALL Tiles
+                    </button>
 
+                    <button
+                        className="filter-toggle-btn"
+                        onClick={() => setShowAll(!showAll)}
+                    >
+                        {showAll ? 'Show Only Running' : 'Show All Theatres'}
+                    </button>
+
+                    <button
+                        className="staff-panel-toggle-btn"
+                        onClick={() => setIsStaffPanelVisible(!isStaffPanelVisible)}
+                    >
+                        {isStaffPanelVisible ? 'Hide Staff Overview' : 'Show Staff Overview'}
+                    </button>
+                </div>
             </div>
 
             <div className="theatre-grid-full-width"> 

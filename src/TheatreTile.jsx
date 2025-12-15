@@ -54,14 +54,14 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
     }
 
     return (
-        <div 
-            className={`theatre-tile ${tileStatusClass}`} 
+        <div
+            className={`theatre-tile ${tileStatusClass}`}
             // Allow tile click to open modal, but prevent if practitioner is empty
-            onClick={() => handleTileClick(name)} 
+            onClick={() => handleTileClick(name)}
         >
             <div className="header">
                 <span className="theatre-name">{name}</span>
-                <span className="eta">ETA {theatreEta}</span>
+                {theatreEta && <span className="eta">ETA: {theatreEta}</span>}
             </div>
 
             <div className="content">
@@ -70,7 +70,7 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
                         <p className="practitioner-info">
                             {currentOdp} {practitionerEndTime}
                         </p>
-                        
+
                         {/* --- CHANGE HERE: Only display if nextPractitioner is present --- */}
                         {nextPractitioner && (
                             <p className="relief-info">
@@ -83,10 +83,10 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
                     <p className="unallocated-text">Click to Allocate</p>
                 )}
             </div>
-            
+
             <div className="footer">
                 {/* Use onMouseDown to prevent the click from also triggering handleTileClick */}
-                <button 
+                <button
                     className={`complete-toggle ${status === 'Running' ? 'running' : ''} ${status === 'Completed' ? 'completed' : ''} ${status === 'Not Running' ? 'not-running' : ''}`}
                     onMouseDown={(e) => e.stopPropagation()} // Stop click propagating to the tile wrapper
                     onClick={(e) => {
