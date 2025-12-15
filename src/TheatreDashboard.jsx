@@ -328,7 +328,7 @@ const TheatreDashboard = () => {
     return (
         <div className="dashboard-container">
             <div className="main-header">
-                <h1>Operating Theatre Coordination Dashboard</h1>
+                <h1>ODP Coordination Dashboard</h1>
                 <div className="time-display">{getCurrentTime()}</div> 
                 
                 {/* --- Data Control Group (Left Side, NEW) --- */}
