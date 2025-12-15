@@ -1,0 +1,104 @@
+/* Modal backdrop (dark overlay) */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* The modal form container */
+.modal-content {
+    background-color: #2a2a2a; 
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
+}
+
+.modal-content h2 {
+    color: white;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 400;
+}
+
+/* Form element styling */
+.modal-content label {
+    display: block;
+    margin-bottom: 15px;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #3c3c3c;
+    color: white;
+    box-sizing: border-box;
+}
+
+/* Checkbox specific styling */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 10px;
+    width: auto;
+}
+
+/* Action buttons */
+.modal-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cancel-btn {
+    background-color: #555;
+    color: white;
+}
+
+.save-btn {
+    background-color: #64dd17; 
+    color: #1a1a1a;
+}
+.reset-btn {
+    background-color: #555555; /* Neutral grey tone */
+    color: white;
+    margin-right: auto; /* Pushes the button to the left */
+}
+/* Styling for the new select dropdown */
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #3c3c3c;
+    color: white;
+    box-sizing: border-box;
+    /* Ensure the text is readable against the dark background */
+}

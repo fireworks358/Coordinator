@@ -1,0 +1,113 @@
+/* --- Global Styling for the Figma Look --- */
+body {
+    background-color: #121212; 
+    color: #f0f0f0; 
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* --- Tile Structure (Slightly Smaller) --- */
+.theatre-tile {
+    width: 160px; /* Reduced from 220px */
+    min-width: 160px; 
+    height: 220px; /* Reduced from 150px */
+    padding: 8px 15px; 
+    margin: 10px;
+    border-radius: 10px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); 
+    transition: transform 0.1s ease-in-out;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.theatre-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8);
+    opacity: 0.98;
+}
+
+/* --- Colour States --- */
+.theatre-tile.neutral { background-color: #333333; color: #aaaaaa; }
+.theatre-tile.complete { background-color: #3b543c; color: #e8f5e9; } 
+.theatre-tile.on-time-green { background-color: #069C56; color: #1a1a1a; } 
+.theatre-tile.mid-risk-orange { background-color: #E29A28; color: #1a1a1a; } 
+.theatre-tile.high-risk-red { background-color: #D3212C; color: white; } 
+
+
+/* --- Header and Content Details --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600; 
+    margin-bottom: 5px;
+}
+
+.theatre-name {
+    font-size: 1.2em; 
+    letter-spacing: 0.5px;
+}
+
+.eta {
+    font-size: 1em;
+    opacity: 0.9;
+}
+
+.content {
+    flex-grow: 1; 
+    padding-top: 5px;
+}
+
+.practitioner-info {
+    font-weight: bold;
+    font-size: 1.2em; /* Increased ODP Name size */
+    margin: 4px 0 2px 0;
+}
+
+.relief-info {
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.unallocated-text {
+    text-align: center;
+    padding-top: 15px;
+    opacity: 0.6;
+}
+
+/* --- Complete Toggle Button Styling --- */
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.complete-toggle {
+    background-color: rgba(0, 0, 0, 0.2); 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.85em;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.complete-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.complete-toggle.completed {
+    background-color: #2e7d32;
+    border-color: #4caf50;
+}
+/* --- New Status Toggle States (Running/Not Running) --- */
+.complete-toggle.running {
+    background-color: #3f51b5; /* Blue for Running */
+    border-color: #5c6bc0;
+}
+
+.complete-toggle.not-running {
+    background-color: #555555; /* Dark grey for Not Running */
+    border-color: #757575;
+}

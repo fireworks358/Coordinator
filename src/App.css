@@ -1,0 +1,19 @@
+#root {
+  max-width: none; 
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  padding: 0;
+  margin: 0;
+  min-width: min-content; 
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+}
