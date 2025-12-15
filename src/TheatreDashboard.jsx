@@ -416,14 +416,14 @@ const TheatreDashboard = () => {
                             ))}
                         </div>
                         
-                        <p className="tab-info">Showing staff with end time: **{activeTab}** ({filteredPractitioners.length} staff)</p>
+                        <p className="tab-info">Showing staff with end time: {activeTab} ({filteredPractitioners.length} staff)</p>
 
                         <div className="practitioner-list">
                             {filteredPractitioners.length > 0 ? (
                                 <ul>
                                     {filteredPractitioners.map((p, index) => (
                                         <li key={index}>
-                                            **{p.name}** (End Time: {p.endTime})
+                                            {p.name} (End Time: {p.endTime})
                                         </li>
                                     ))}
                                 </ul>

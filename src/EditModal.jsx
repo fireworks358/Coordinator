@@ -103,7 +103,7 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                         Current ODP:
                         <input
                             type="text"
-                            list="practitioner-names" {/* Links to the datalist */}
+                            list="practitioner-names"
                             name="currentOdp"
                             placeholder="Type or select name..."
                             value={getCurrentOdpDisplayValue()} // Display the formatted name or the custom text
@@ -137,7 +137,7 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                         Next Practitioner (Relief):
                         <input
                             type="text"
-                            list="practitioner-names" {/* Links to the datalist */}
+                            list="practitioner-names"
                             name="nextPractitioner"
                             placeholder="Type or select relief name..."
                             value={formData.nextPractitioner} // nextPractitioner holds the clean name
