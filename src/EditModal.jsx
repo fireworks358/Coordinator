@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react'; // Removed useEffect since it wasn't used
+import React, { useState, useMemo } from 'react';
 import './EditModal.css';
 
-// Modal now accepts practitionerList as a prop
 const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => { 
     
     // --- UPDATED: Sort and Format Practitioner List ---
@@ -16,7 +15,7 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
         }));
     }, [practitionerList]);
     
-    // 3. Convert formatted list to a Map for O(1) lookup efficiency when setting the end time
+    // 3. Convert formatted list to a Map for O(1) lookup efficiency 
     // Key: "M Varghese (End Time: 17:30)", Value: "17:30"
     const practitionerMap = useMemo(() => {
         return new Map(sortedPractitioners.map(p => [p.formattedName, p.endTime]));
@@ -41,20 +40,19 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
 
             // --- CORE LOGIC: Auto-set Practitioner End Time ---
             if (practitionerMap.has(value)) {
-                // If the user selected a formatted name from the list
+                // User selected a formatted name from the list
                 newFormData.practitionerEndTime = practitionerMap.get(value);
                 
-                // IMPORTANT: When saving the state, we need to save the CLEAN name, not the formatted name.
-                // Extract only the name part for the internal state.
+                // IMPORTANT: Extract CLEAN name to save to state
                 const cleanNameMatch = value.match(/(.*) \(End Time:.*\)/);
                 newFormData.currentOdp = cleanNameMatch ? cleanNameMatch[1].trim() : value;
 
             } else if (value === '') {
-                 // If input is cleared, clear the end time field
+                 // Input is cleared
                 newFormData.practitionerEndTime = ''; 
                 newFormData.currentOdp = '';
             } else {
-                 // User typed a custom name (not in the map), use the custom input
+                 // User typed a custom name, use the custom input
                  newFormData.currentOdp = value;
             }
         }
@@ -62,8 +60,7 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
         // Update the form data state
         setFormData({
             ...newFormData,
-            // Handle checkbox or standard text/input value for all other fields (including nextPractitioner)
-            // Note: currentOdp is handled above to ensure we only save the clean name
+            // Ensure currentOdp uses the logic above, others use standard change
             [name]: name === 'currentOdp' ? newFormData.currentOdp : (type === 'checkbox' ? (checked ? 'Yes' : 'No') : value),
         });
     };
@@ -80,10 +77,10 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
     };
     
     // Function to handle how the name is displayed in the input field
-    // This is necessary because we save the *clean* name in state, but the list uses the *formatted* name.
     const getCurrentOdpDisplayValue = () => {
-        // If the current saved ODP is found in the list, display the formatted string.
+        // Find the formatted string for the saved clean name
         const match = sortedPractitioners.find(p => p.name === formData.currentOdp);
+        // If found, display the formatted string, otherwise display the saved name (which is custom)
         return match ? match.formattedName : formData.currentOdp;
     };
 
@@ -106,10 +103,10 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                         Current ODP:
                         <input
                             type="text"
-                            list="practitioner-names" 
+                            list="practitioner-names" {/* Links to the datalist */}
                             name="currentOdp"
                             placeholder="Type or select name..."
-                            value={getCurrentOdpDisplayValue()} // Use the function to display the correct string
+                            value={getCurrentOdpDisplayValue()} // Display the formatted name or the custom text
                             onChange={handleChange}
                         />
                     </label>
@@ -140,10 +137,10 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                         Next Practitioner (Relief):
                         <input
                             type="text"
-                            list="practitioner-names" 
+                            list="practitioner-names" {/* Links to the datalist */}
                             name="nextPractitioner"
                             placeholder="Type or select relief name..."
-                            value={formData.nextPractitioner} // nextPractitioner always holds the clean name
+                            value={formData.nextPractitioner} // nextPractitioner holds the clean name
                             onChange={handleChange}
                         />
                     </label>

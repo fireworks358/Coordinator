@@ -17,12 +17,12 @@ const initialTheatreData = [
     { name: 'Theatre E10', currentOdp: 'T Eason', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'A Salt', status: 'Running'},
     { name: 'Theatre E11', currentOdp: 'A Salt', theatreEta: '18:30', practitionerEndTime: '17:30', nextPractitioner: 'J Mower', status: 'Running'},
     { name: 'Theatre E12', currentOdp: 'J Mower', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'K Innes', status: 'Running'},
-    { name: 'CEPOD 2 E13', currentOdp: 'K Innes', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'H Lee', status: 'Running'},
-    { name: 'CEPOD E14', currentOdp: 'H Lee', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'M Santos', status: 'Running'},
+    { name: 'CEEPOD 2 / E13', currentOdp: 'K Innes', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'H Lee', status: 'Running'},
+    { name: 'CEEPOD 3 / E14', currentOdp: 'H Lee', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'M Santos', status: 'Running'},
     { name: 'Theatre E15', currentOdp: 'M Santos', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'},
     { name: 'Theatre E16', currentOdp: '', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: '', status: 'Running'}, 
-    { name: 'Trauma 1 E17', currentOdp: 'S Adny', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'M Beenby', status: 'Running'},
-    { name: 'Trauma 2 E18', currentOdp: 'M Beenby', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'A Biju', status: 'Running'},
+    { name: 'Trauma 1 / E17', currentOdp: 'S Adny', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'M Beenby', status: 'Running'},
+    { name: 'Trauma 2 / E18', currentOdp: 'M Beenby', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'A Biju', status: 'Running'},
     { name: 'Theatre E19', currentOdp: 'A Biju', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'R Whiling', status: 'Running'},
     { name: 'Theatre E20', currentOdp: 'R Whiling', theatreEta: '18:00', practitionerEndTime: '17:30', nextPractitioner: 'S Harper', status: 'Running'},
     { name: 'Theatre E21', currentOdp: 'S Harper', theatreEta: '17:30', practitionerEndTime: '17:30', nextPractitioner: 'G Noube', status: 'Running'},
@@ -49,7 +49,7 @@ const defaultPractitioners = [
     { name: 'K Bovis', endTime: '18:00' },
 ];
 
-// --- HELPER FUNCTIONS FOR LOCAL STORAGE (UNCHANGED) ---
+// --- HELPER FUNCTION FOR LOCAL STORAGE (RESTORED) ---
 const getInitialState = (key, defaultData) => {
     try {
         const storedData = localStorage.getItem(key);
@@ -66,7 +66,7 @@ const getInitialState = (key, defaultData) => {
 
 
 const TheatreDashboard = () => {
-    // Load state from localStorage on startup 
+    // Load state from localStorage on startup (RESTORED)
     const [theatres, setTheatres] = useState(() => getInitialState('theatreData', initialTheatreData));
     const [practitionerList, setPractitionerList] = useState(() => getInitialState('practitionerListData', defaultPractitioners));
     
@@ -77,7 +77,7 @@ const TheatreDashboard = () => {
     const [showAll, setShowAll] = useState(true);
     const [activeTab, setActiveTab] = useState('17:30s'); 
 
-    // useEffect to save data on state change (UNCHANGED)
+    // useEffect to save data on state change (RESTORED)
     useEffect(() => {
         try {
             localStorage.setItem('theatreData', JSON.stringify(theatres));
@@ -95,8 +95,7 @@ const TheatreDashboard = () => {
     }, [practitionerList]);
     
 
-    // --- DATA EXPORT/IMPORT LOGIC (UNCHANGED) ---
-
+    // --- DATA EXPORT/IMPORT LOGIC (RESTORED) ---
     const handleDownload = () => {
         const dashboardData = {
             theatres: theatres,
@@ -142,26 +141,30 @@ const TheatreDashboard = () => {
         };
         reader.readAsText(file);
     };
-
     // -----------------------------------------
 
 
-    // --- CSV Parsing and File Upload Logic (UNCHANGED) ---
+    // --- CSV Parsing and File Upload Logic (FROM USER UPLOAD) ---
     const parseCSV = (csvText) => {
         const lines = csvText.trim().split(/\r?\n/).filter(line => line.trim() !== '');
+
         if (lines.length < 9) {
             alert("CSV appears too short. Please ensure you are uploading the full Roster file.");
             return [];
         }
+
         const DATA_START_INDEX = 8;
         const FORENAMES_INDEX = 4;
         const SURNAME_INDEX = 5;
         const END_TIME_INDEX = 16; 
+        
         const dataRows = lines.slice(DATA_START_INDEX); 
         
         const newPractitioners = dataRows.map(line => {
             const columns = line.split(','); 
+            
             if (columns.length >= END_TIME_INDEX + 1) { 
+                
                 const forenames = columns[FORENAMES_INDEX].trim();
                 const surname = columns[SURNAME_INDEX].trim();
                 const endTime = columns[END_TIME_INDEX].trim();
@@ -174,7 +177,7 @@ const TheatreDashboard = () => {
                 }
             }
             return null;
-        }).filter(p => p !== null);
+        }).filter(p => p !== null); 
 
         if (newPractitioners.length === 0) {
              alert("Successfully read file, but extracted 0 valid staff entries. Check if column headers have shifted.");
@@ -212,7 +215,7 @@ const TheatreDashboard = () => {
     };
     // ----------------------------------------------------
 
-    // --- Practitioner Filtering Logic (UNCHANGED) ---
+    // --- Practitioner Filtering Logic (RESTORED) ---
     const getFilteredPractitioners = (list, tab) => {
         return list.filter(p => {
             const endTime = p.endTime.replace(':', ''); 
@@ -305,15 +308,13 @@ const TheatreDashboard = () => {
         }
     };
     
-    // --- UPDATED FILTER LOGIC HERE ---
+    // Updated filter logic: Show only Running when filter is active
     const filteredTheatres = useMemo(() => {
         if (showAll) {
             return theatres;
         }
-        // Only show theatres that are 'Running'. This hides 'Complete' AND 'Not Running'.
         return theatres.filter(t => t.status === 'Running'); 
     }, [theatres, showAll]);
-    // ---------------------------------
 
     const group1 = filteredTheatres.slice(0, 11); 
     const group2 = filteredTheatres.slice(11, 22);
@@ -330,6 +331,7 @@ const TheatreDashboard = () => {
                 <h1>Operating Theatre Coordination Dashboard</h1>
                 <div className="time-display">{getCurrentTime()}</div> 
                 
+                {/* --- Data Control Group (Left Side, NEW) --- */}
                 <div className="data-control-group-left">
                     <div className="csv-upload-container">
                         <label htmlFor="csv-upload" className="upload-label">
@@ -362,7 +364,10 @@ const TheatreDashboard = () => {
                         />
                     </div>
                 </div>
+                {/* --------------------------------------------- */}
 
+
+                {/* --- Action Buttons (Right Side) --- */}
                 <button 
                     className="staff-panel-toggle-btn"
                     onClick={() => setIsStaffPanelVisible(!isStaffPanelVisible)}
@@ -374,7 +379,6 @@ const TheatreDashboard = () => {
                     className="filter-toggle-btn"
                     onClick={() => setShowAll(!showAll)}
                 >
-                    {/* Updated button text for clarity based on new behavior */}
                     {showAll ? 'Show Only Running' : 'Show All Theatres'} 
                 </button>
                 
@@ -384,6 +388,7 @@ const TheatreDashboard = () => {
                 >
                     Clear ALL Tiles
                 </button>
+                {/* ------------------------------------------- */}
 
             </div>
 
@@ -411,14 +416,14 @@ const TheatreDashboard = () => {
                             ))}
                         </div>
                         
-                        <p className="tab-info">Showing staff with end time: {activeTab} ({filteredPractitioners.length} staff)</p>
+                        <p className="tab-info">Showing staff with end time: **{activeTab}** ({filteredPractitioners.length} staff)</p>
 
                         <div className="practitioner-list">
                             {filteredPractitioners.length > 0 ? (
                                 <ul>
                                     {filteredPractitioners.map((p, index) => (
                                         <li key={index}>
-                                            {p.name} (End Time: {p.endTime})
+                                            **{p.name}** (End Time: {p.endTime})
                                         </li>
                                     ))}
                                 </ul>
