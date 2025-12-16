@@ -385,7 +385,7 @@ const TheatreDashboard = () => {
                         className="theme-toggle-btn"
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     >
-                        {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     </button>
 
                     <button
