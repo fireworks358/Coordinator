@@ -32,7 +32,7 @@ body {
 */
 @media (min-width: 1920px) {
     .theatre-tile {
-        width: 140px;
+        width: 142px;
         min-width: 140px;
         height: 145px;
         padding: 6px 5px;
@@ -100,6 +100,35 @@ body {
     font-weight: bold;
     font-size: 1.1em;
     margin: 3px 0 2px 0;
+}
+
+/* --- Time-based highlighting for staff --- */
+.practitioner-info.early-finish {
+    background-color: rgba(255, 0, 238, 0.4); /* Magenta highlight */
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-left: 3px solid #ff00c3;
+}
+
+.practitioner-info.mid-finish {
+    background-color: rgba(0, 81, 255, 0.3); /* Blue highlight */
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-left: 3px solid #0011ff;
+}
+
+.practitioner-info.late-1830-finish {
+    background-color: rgba(255, 145, 0, 0.4); /* Purple highlight */
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-left: 3px solid #ffa200;
+}
+
+.practitioner-info.late-2000-finish {
+    background-color: rgba(255, 0, 0, 0.4); /* Brown highlight */
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-left: 3px solid #ff0000;
 }
 
 .relief-info {

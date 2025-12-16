@@ -5,11 +5,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "predeploy": "npm run build",
-  "dev": "vite",
-  "build": "vite build"
+    "predeploy": "npm run build",
+    "dev": "vite",
+    "build": "vite build"
   },
   "dependencies": {
+    "firebase": "^12.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

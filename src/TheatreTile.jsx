@@ -21,21 +21,42 @@ const getTileColor = (theatreEta, status, currentOdp) => {
 // --- Helper to determine button text and next status ---
 const getNextStatus = (currentStatus) => {
     switch (currentStatus) {
-        case 'Complete':
-            return 'Running'; // Cycle from Complete to Running
         case 'Running':
-            return 'Not Running'; // Cycle from Running to Not Running
+            return 'Complete'; // Cycle from Running to Complete
+        case 'Complete':
+            return 'Not Running'; // Cycle from Complete to Not Running
         case 'Not Running':
         case 'No': // Default initial state will be 'No' from old data or 'Not Running' from new reset.
         default:
-            return 'Complete'; // Cycle from Not Running/Default to Complete
+            return 'Running'; // Cycle from Not Running/Default to Running
     }
 };
 
-const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle }) => {
+const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings }) => {
 
     // Status is now used for both color and toggle logic
     const tileStatusClass = getTileColor(theatreEta, status, currentOdp);
+
+    // Determine practitioner time highlight class based on settings
+    const getPractitionerTimeClass = (endTime) => {
+        // Don't highlight if status is "Not Running" or "Complete"
+        if (status === 'Not Running' || status === 'Complete') return '';
+
+        if (!endTime || !highlightSettings) return '';
+        const timeNumeric = parseInt(endTime.replace(':', ''), 10);
+
+        // Check each time category and whether it should be highlighted
+        if (timeNumeric <= 1601 && highlightSettings.highlightEarlies) {
+            return 'early-finish'; // Finishing at or before 16:01
+        } else if (timeNumeric >= 1602 && timeNumeric <= 1759 && highlightSettings.highlight1730s) {
+            return 'mid-finish'; // 17:30s (16:02-17:59)
+        } else if (timeNumeric === 1830 && highlightSettings.highlight1830s) {
+            return 'late-1830-finish'; // 18:30
+        } else if (timeNumeric === 2000 && highlightSettings.highlightLates) {
+            return 'late-2000-finish'; // 20:00 (Lates)
+        }
+        return ''; // No highlight
+    };
 
     // Determine button text
     let buttonText;
@@ -67,7 +88,7 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
             <div className="content">
                 {currentOdp ? (
                     <>
-                        <p className="practitioner-info">
+                        <p className={`practitioner-info ${getPractitionerTimeClass(practitionerEndTime)}`}>
                             {currentOdp} {practitionerEndTime}
                         </p>
 

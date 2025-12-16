@@ -1,75 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import TheatreTile from './TheatreTile.jsx'; 
-import EditModal from './EditModal.jsx'; 
+import TheatreTile from './TheatreTile.jsx';
+import EditModal from './EditModal.jsx';
 import './TheatreDashboard.css';
-
-// --- INITIAL DATA DEFINITIONS (UNCHANGED) ---
-const initialTheatreData = [
-    { name: 'Theatre E1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E8', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E9', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E10', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E11', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E12', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'CEPOD 2 E13', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'CEPOD E14', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E15', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E16', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Trauma 1 / E17', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Trauma 2 / E18', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E19', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E20', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E21', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre E22', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Theatre D7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Maternity Emergency', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Maternity Elective', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Endoscopy', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'IR', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'MRI', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Cardiology', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Spare', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-    { name: 'Spare 2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
-];
-
-const defaultPractitioners = [
-    { name: 'M Varghese', endTime: '17:30' },
-    { name: 'K Bevis', endTime: '18:00' },
-];
-
-// --- HELPER FUNCTION FOR LOCAL STORAGE (RESTORED) ---
-const getInitialState = (key, defaultData) => {
-    try {
-        const storedData = localStorage.getItem(key);
-        if (storedData) {
-            return JSON.parse(storedData);
-        }
-    } catch (error) {
-        console.error("Error loading state from localStorage:", error);
-    }
-    return defaultData;
-};
-
-// ----------------------------------------------
-
+import { useTheatreData } from './hooks/useTheatreData.js';
+import { usePractitionerData } from './hooks/usePractitionerData.js';
+import { useTheme, useHighlightSettings } from './hooks/useSettings.js';
+import storageService from './services/storageService.js';
 
 const TheatreDashboard = () => {
-    // Load state from localStorage on startup (RESTORED)
-    const [theatres, setTheatres] = useState(() => getInitialState('theatreData', initialTheatreData));
-    const [practitionerList, setPractitionerList] = useState(() => getInitialState('practitionerListData', defaultPractitioners));
-    const [theme, setTheme] = useState(() => getInitialState('theme', 'dark'));
+    // Use custom hooks for state management with Firebase sync
+    const { theatres, setTheatres, updateTheatre } = useTheatreData();
+    const { practitionerList, setPractitionerList, updatePractitioner } = usePractitionerData();
+    const { theme, setTheme } = useTheme();
+    const { highlightSettings, updateHighlightSetting } = useHighlightSettings();
 
     // Existing States
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,34 +20,8 @@ const TheatreDashboard = () => {
     const [isStaffPanelVisible, setIsStaffPanelVisible] = useState(false);
     const [showAll, setShowAll] = useState(true);
     const [activeTab, setActiveTab] = useState('17:30s');
-    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })); 
-
-    // useEffect to save data on state change (RESTORED)
-    useEffect(() => {
-        try {
-            localStorage.setItem('theatreData', JSON.stringify(theatres));
-        } catch (error) {
-            console.error("Error saving theatre data to localStorage:", error);
-        }
-    }, [theatres]);
-
-    useEffect(() => {
-        try {
-            localStorage.setItem('practitionerListData', JSON.stringify(practitionerList));
-        } catch (error) {
-            console.error("Error saving practitioner list to localStorage:", error);
-        }
-    }, [practitionerList]);
-
-    useEffect(() => {
-        try {
-            localStorage.setItem('theme', JSON.stringify(theme));
-            // Apply theme to body element
-            document.body.className = theme === 'light' ? 'light-theme' : 'dark-theme';
-        } catch (error) {
-            console.error("Error saving theme to localStorage:", error);
-        }
-    }, [theme]);
+    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
+    const [isHighlightPanelVisible, setIsHighlightPanelVisible] = useState(false);
 
     // Update time every second
     useEffect(() => {
@@ -117,25 +34,27 @@ const TheatreDashboard = () => {
     }, []);
     
 
-    // --- DATA EXPORT/IMPORT LOGIC (RESTORED) ---
-    const handleDownload = () => {
-        const dashboardData = {
-            theatres: theatres,
-            practitionerList: practitionerList,
-        };
-        const jsonString = JSON.stringify(dashboardData, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+    // --- DATA EXPORT/IMPORT LOGIC ---
+    const handleDownload = async () => {
+        try {
+            const dashboardData = await storageService.exportAllData();
+            const jsonString = JSON.stringify(dashboardData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
 
-        const a = document.createElement('a');
-        a.href = url;
-        const filename = `theatre_dashboard_backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.json`;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert("Dashboard data downloaded successfully! Filename: " + filename);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = `theatre_dashboard_backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.json`;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Dashboard data downloaded successfully! Filename: " + filename);
+        } catch (error) {
+            console.error("Error exporting data:", error);
+            alert("Error downloading data. Please try again.");
+        }
     };
 
     const handleDataUpload = (event) => {
@@ -143,15 +62,29 @@ const TheatreDashboard = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
                 const jsonText = e.target.result;
                 const uploadedData = JSON.parse(jsonText);
 
                 if (uploadedData.theatres && uploadedData.practitionerList) {
-                    setTheatres(uploadedData.theatres);
+                    // Ensure imported theatres have order field and are sorted
+                    const theatresWithOrder = uploadedData.theatres.map((t, index) => ({
+                        ...t,
+                        order: t.order !== undefined ? t.order : index
+                    })).sort((a, b) => a.order - b.order);
+
+                    // Import to both Firebase and localStorage via storageService
+                    await storageService.importAllData({
+                        ...uploadedData,
+                        theatres: theatresWithOrder
+                    });
+
+                    // Update local state to reflect imported data
+                    setTheatres(theatresWithOrder);
                     setPractitionerList(uploadedData.practitionerList);
-                    alert(`Successfully loaded ${uploadedData.theatres.length} theatres and ${uploadedData.practitionerList.length} staff from backup file.`);
+
+                    alert(`Successfully loaded ${theatresWithOrder.length} theatres and ${uploadedData.practitionerList.length} staff from backup file.`);
                 } else {
                     alert("Backup file format invalid. Missing 'theatres' or 'practitionerList' keys.");
                 }
@@ -159,7 +92,7 @@ const TheatreDashboard = () => {
                 console.error("Error reading or parsing backup file:", error);
                 alert("Error loading data. Please ensure the file is a valid JSON backup.");
             }
-            event.target.value = null; 
+            event.target.value = null;
         };
         reader.readAsText(file);
     };
@@ -195,6 +128,8 @@ const TheatreDashboard = () => {
                     return {
                         name: `${forenames} ${surname}`,
                         endTime: endTime,
+                        relieved: false,
+                        supper: false
                     };
                 }
             }
@@ -240,7 +175,7 @@ const TheatreDashboard = () => {
     // --- Practitioner Filtering Logic (RESTORED) ---
     const getFilteredPractitioners = (list, tab) => {
         return list.filter(p => {
-            const endTime = p.endTime.replace(':', ''); 
+            const endTime = p.endTime.replace(':', '');
             const endNumeric = parseInt(endTime, 10);
 
             switch (tab) {
@@ -253,7 +188,9 @@ const TheatreDashboard = () => {
                 case 'Lates':
                     return endTime === '2000';
                 case 'Nights':
-                    return endTime === '0800'; 
+                    return endTime === '0800';
+                case 'All Staff':
+                    return true;
                 default:
                     return true;
             }
@@ -265,6 +202,17 @@ const TheatreDashboard = () => {
     }, [practitionerList, activeTab]);
     // -----------------------------------------
 
+
+    // --- Checkbox Handler for Staff Status ---
+    const handleCheckboxChange = (practitionerName, checkboxType) => {
+        setPractitionerList(prevList =>
+            prevList.map(p =>
+                p.name === practitionerName
+                    ? { ...p, [checkboxType]: !p[checkboxType] }
+                    : p
+            )
+        );
+    };
 
     // --- Other Handlers (UNCHANGED) ---
     const handleStatusToggle = (name, newStatus) => {
@@ -328,8 +276,22 @@ const TheatreDashboard = () => {
                 nextPractitioner: '',
                 status: 'Not Running',
             })));
+
+            // Reset all checkbox states
+            setPractitionerList(prevList =>
+                prevList.map(p => ({
+                    ...p,
+                    relieved: false,
+                    supper: false
+                }))
+            );
+
             setShowAll(true);
         }
+    };
+
+    const handleHighlightToggle = (setting) => {
+        updateHighlightSetting(setting);
     };
     
     // Updated filter logic: Show only Running when filter is active
@@ -384,7 +346,7 @@ const TheatreDashboard = () => {
 
                 {/* --- Center: Title and Time --- */}
                 <div className="header-content">
-                    <h1>ODP Coordination Dashboard</h1>
+                    <h1>ODP Dashboard</h1>
                     <div className="time-display">{currentTime}</div>
                 </div>
 
@@ -420,20 +382,68 @@ const TheatreDashboard = () => {
                 </div>
             </div>
 
-            <div className="theatre-grid-full-width"> 
+            <div className="theatre-grid-full-width">
                 <div className="theatre-rows-wrapper">
-                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} />)}</div>
-                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} />)}</div>
-                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} />)}</div>
-                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} />)}</div>
+                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
+                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
+                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
+                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
                 </div>
+
+                {/* Highlight Settings Toggle Button - Bottom Right Corner */}
+                <button
+                    className="highlight-panel-toggle"
+                    onClick={() => setIsHighlightPanelVisible(!isHighlightPanelVisible)}
+                >
+                    {isHighlightPanelVisible ? 'Close Highlights' : 'Highlight Settings'}
+                </button>
+
+                {/* Highlight Settings Panel */}
+                {isHighlightPanelVisible && (
+                    <div className="highlight-settings-panel">
+                        <h3>Highlight Settings</h3>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlightEarlies}
+                                onChange={() => handleHighlightToggle('highlightEarlies')}
+                            />
+                            Highlight Earlies? (≤16:01)
+                        </label>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlight1730s}
+                                onChange={() => handleHighlightToggle('highlight1730s')}
+                            />
+                            Highlight 17:30s?
+                        </label>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlight1830s}
+                                onChange={() => handleHighlightToggle('highlight1830s')}
+                            />
+                            Highlight 18:30s?
+                        </label>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlightLates}
+                                onChange={() => handleHighlightToggle('highlightLates')}
+                            />
+                            Highlight Lates? (20:00)
+                        </label>
+                    </div>
+                )}
+
                 
                 {isStaffPanelVisible && (
                     <div className="staff-overview-popup">
                         <h2>Staffing Overview ({practitionerList.length} Total Staff)</h2>
                         
                         <div className="tab-navigation">
-                            {['Earlies', '17:30s', '18:30s', 'Lates', 'Nights'].map(tab => (
+                            {['Earlies', '17:30s', '18:30s', 'Lates', 'Nights', 'All Staff'].map(tab => (
                                 <button
                                     key={tab}
                                     className={`tab-button ${activeTab === tab ? 'active' : ''}`}
@@ -449,11 +459,58 @@ const TheatreDashboard = () => {
                         <div className="practitioner-list">
                             {filteredPractitioners.length > 0 ? (
                                 <ul>
-                                    {filteredPractitioners.map((p, index) => (
-                                        <li key={index}>
-                                            {p.name} (End Time: {p.endTime})
-                                        </li>
-                                    ))}
+                                    {filteredPractitioners.map((p, index) => {
+                                        // Determine checkbox visibility based on tab
+                                        const endTime = p.endTime.replace(':', '');
+                                        const endNumeric = parseInt(endTime, 10);
+                                        const isEarly = endNumeric >= 900 && endNumeric <= 1700;
+                                        const is1730 = endTime === '1730';
+                                        const isLate = endTime === '2000';
+
+                                        const showRelievedCheckbox =
+                                            activeTab === 'Earlies' || activeTab === '17:30s' ||
+                                            (activeTab === 'All Staff' && (isEarly || is1730));
+                                        const showSupperCheckbox =
+                                            activeTab === 'Lates' ||
+                                            (activeTab === 'All Staff' && isLate);
+
+                                        // Apply strikethrough if either relieved or supper is checked
+                                        const shouldStrikethrough =
+                                            (p.relieved && showRelievedCheckbox) ||
+                                            (p.supper && showSupperCheckbox);
+
+                                        return (
+                                            <li key={index} className="practitioner-item">
+                                                <div className="practitioner-info">
+                                                    <span className={shouldStrikethrough ? 'relieved-name' : ''}>
+                                                        {p.name} (End Time: {p.endTime})
+                                                    </span>
+                                                </div>
+
+                                                {showRelievedCheckbox && (
+                                                    <label className="checkbox-label">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={p.relieved || false}
+                                                            onChange={() => handleCheckboxChange(p.name, 'relieved')}
+                                                        />
+                                                        Relieved?
+                                                    </label>
+                                                )}
+
+                                                {showSupperCheckbox && (
+                                                    <label className="checkbox-label">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={p.supper || false}
+                                                            onChange={() => handleCheckboxChange(p.name, 'supper')}
+                                                        />
+                                                        Supper?
+                                                    </label>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             ) : (
                                 <p>No staff loaded for this time category, or please upload a CSV roster.</p>
