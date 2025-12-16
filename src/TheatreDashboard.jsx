@@ -76,7 +76,8 @@ const TheatreDashboard = () => {
     const [selectedTheatre, setSelectedTheatre] = useState(null);
     const [isStaffPanelVisible, setIsStaffPanelVisible] = useState(false);
     const [showAll, setShowAll] = useState(true);
-    const [activeTab, setActiveTab] = useState('17:30s'); 
+    const [activeTab, setActiveTab] = useState('17:30s');
+    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })); 
 
     // useEffect to save data on state change (RESTORED)
     useEffect(() => {
@@ -104,6 +105,16 @@ const TheatreDashboard = () => {
             console.error("Error saving theme to localStorage:", error);
         }
     }, [theme]);
+
+    // Update time every second
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
+        }, 1000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(timer);
+    }, []);
     
 
     // --- DATA EXPORT/IMPORT LOGIC (RESTORED) ---
@@ -330,11 +341,7 @@ const TheatreDashboard = () => {
     const group1 = filteredTheatres.slice(0, 11); 
     const group2 = filteredTheatres.slice(11, 22);
     const group3 = filteredTheatres.slice(22, 29);
-    const group4_Specialized = filteredTheatres.slice(29); 
-    
-    const getCurrentTime = () => {
-        return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-    };
+    const group4_Specialized = filteredTheatres.slice(29);
 
     return (
         <div className="dashboard-container">
@@ -376,7 +383,7 @@ const TheatreDashboard = () => {
                 {/* --- Center: Title and Time --- */}
                 <div className="header-content">
                     <h1>ODP Coordination Dashboard</h1>
-                    <div className="time-display">{getCurrentTime()}</div>
+                    <div className="time-display">{currentTime}</div>
                 </div>
 
                 {/* --- Action Buttons (Right Side) --- */}
