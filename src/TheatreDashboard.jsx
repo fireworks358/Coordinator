@@ -5,43 +5,43 @@ import './TheatreDashboard.css';
 
 // --- INITIAL DATA DEFINITIONS (UNCHANGED) ---
 const initialTheatreData = [
-    { name: 'Theatre E1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E8', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E9', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E10', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E11', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E12', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'CEPOD 2 E13', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'CEPOD E14', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E15', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E16', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Trauma 1 / E17', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Trauma 2 / E18', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E19', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E20', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E21', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre E22', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Theatre D7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Maternity Emergency', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Maternity Elective', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Endoscopy', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'IR', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'MRI', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Cardiology', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Spare', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
-    { name: 'Spare 2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running'},
+    { name: 'Theatre E1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E8', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E9', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E10', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E11', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E12', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'CEPOD 2 E13', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'CEPOD E14', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E15', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E16', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Trauma 1 / E17', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Trauma 2 / E18', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E19', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E20', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E21', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre E22', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D3', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D4', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D5', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D6', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Theatre D7', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Maternity Emergency', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Maternity Elective', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Endoscopy', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'IR', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'MRI', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Cardiology', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Spare', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
+    { name: 'Spare 2', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: ''},
 ];
 
 const defaultPractitioners = [
@@ -272,36 +272,38 @@ const TheatreDashboard = () => {
 
     const handleSave = (name, formData) => {
         const updatedData = {
+            name: formData.name,
             currentOdp: formData.currentOdp,
             theatreEta: formData.theatreEta,
             practitionerEndTime: formData.practitionerEndTime,
             nextPractitioner: formData.nextPractitioner,
-            status: formData.isComplete === 'Yes' ? 'Complete' : 'Running', 
+            phoneExtension: formData.phoneExtension,
+            status: formData.isComplete === 'Yes' ? 'Complete' : 'Running',
         };
 
-        setTheatres(prevTheatres => prevTheatres.map(t => 
+        setTheatres(prevTheatres => prevTheatres.map(t =>
             t.name === name
                 ? { ...t, ...updatedData }
                 : t
         ));
-        setIsModalOpen(false); 
+        setIsModalOpen(false);
         setSelectedTheatre(null);
     };
 
     const handleReset = (name) => {
-        setTheatres(prevTheatres => prevTheatres.map(t => 
+        setTheatres(prevTheatres => prevTheatres.map(t =>
             t.name === name
-                ? { 
-                    ...t, 
-                    currentOdp: '', 
-                    theatreEta: '', 
-                    practitionerEndTime: '', 
+                ? {
+                    ...t,
+                    currentOdp: '',
+                    theatreEta: '',
+                    practitionerEndTime: '',
                     nextPractitioner: '',
                     status: 'Not Running'
                   }
                 : t
         ));
-        setIsModalOpen(false); 
+        setIsModalOpen(false);
         setSelectedTheatre(null);
     };
 
@@ -310,12 +312,12 @@ const TheatreDashboard = () => {
             setTheatres(prevTheatres => prevTheatres.map(t => ({
                 ...t,
                 currentOdp: '',
-                theatreEta: '', 
-                practitionerEndTime: '', 
+                theatreEta: '',
+                practitionerEndTime: '',
                 nextPractitioner: '',
                 status: 'Not Running',
             })));
-            setShowAll(true); 
+            setShowAll(true);
         }
     };
     
@@ -385,7 +387,7 @@ const TheatreDashboard = () => {
                         className="theme-toggle-btn"
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     >
-                        {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     </button>
 
                     <button

@@ -32,11 +32,11 @@ const getNextStatus = (currentStatus) => {
     }
 };
 
-const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, status, handleTileClick, handleStatusToggle }) => {
-    
+const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle }) => {
+
     // Status is now used for both color and toggle logic
     const tileStatusClass = getTileColor(theatreEta, status, currentOdp);
-    
+
     // Determine button text
     let buttonText;
     switch (status) {
@@ -85,6 +85,13 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
             </div>
 
             <div className="footer">
+                {/* Phone extension display on hover - bottom left */}
+                {phoneExtension && (
+                    <span className="phone-extension">
+                        {phoneExtension}
+                    </span>
+                )}
+
                 {/* Use onMouseDown to prevent the click from also triggering handleTileClick */}
                 <button
                     className={`complete-toggle ${status === 'Running' ? 'running' : ''} ${status === 'Completed' ? 'completed' : ''} ${status === 'Not Running' ? 'not-running' : ''}`}

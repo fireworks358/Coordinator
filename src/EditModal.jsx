@@ -23,11 +23,13 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
 
     // Initial state logic (unchanged)
     const [formData, setFormData] = useState({
+        name: theatre.name || '',
         currentOdp: theatre.currentOdp || '',
-        theatreEta: theatre.theatreEta || '17:30', 
+        theatreEta: theatre.theatreEta || '17:30',
         practitionerEndTime: theatre.practitionerEndTime || '17:30',
         nextPractitioner: theatre.nextPractitioner || '',
-        isComplete: theatre.status === 'Complete' ? 'Yes' : 'No', 
+        phoneExtension: theatre.phoneExtension || '',
+        isComplete: theatre.status === 'Complete' ? 'Yes' : 'No',
     });
 
     const handleChange = (e) => {
@@ -98,6 +100,31 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                             <option key={index} value={p.formattedName} />
                         ))}
                     </datalist>
+
+                    <label>
+                        Theatre Name:
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Enter theatre name..."
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </label>
+
+                    <label>
+                        Phone Extension (4 digits):
+                        <input
+                            type="text"
+                            name="phoneExtension"
+                            placeholder="e.g., 1234"
+                            value={formData.phoneExtension}
+                            onChange={handleChange}
+                            maxLength="4"
+                            pattern="[0-9]*"
+                        />
+                    </label>
 
                     <label>
                         Current ODP:
