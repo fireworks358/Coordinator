@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import './EditModal.css';
 
-const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => { 
-    
+const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
+
+    // State for collapsible advanced settings
+    const [showAdvanced, setShowAdvanced] = useState(false);
+
     // --- UPDATED: Sort and Format Practitioner List ---
     const sortedPractitioners = useMemo(() => {
         // 1. Create a copy and sort it by name
@@ -101,30 +104,45 @@ const EditModal = ({ theatre, onClose, onSave, onReset, practitionerList }) => {
                         ))}
                     </datalist>
 
-                    <label>
-                        Theatre Name:
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Enter theatre name..."
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                        />
-                    </label>
+                    {/* Collapsible Advanced Settings */}
+                    <div className="advanced-settings">
+                        <button
+                            type="button"
+                            className="advanced-toggle"
+                            onClick={() => setShowAdvanced(!showAdvanced)}
+                        >
+                            {showAdvanced ? '▼' : '▶'} Advanced Settings
+                        </button>
 
-                    <label>
-                        Phone Extension (4 digits):
-                        <input
-                            type="text"
-                            name="phoneExtension"
-                            placeholder="e.g., 1234"
-                            value={formData.phoneExtension}
-                            onChange={handleChange}
-                            maxLength="4"
-                            pattern="[0-9]*"
-                        />
-                    </label>
+                        {showAdvanced && (
+                            <div className="advanced-content">
+                                <label>
+                                    Theatre Name:
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Enter theatre name..."
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </label>
+
+                                <label>
+                                    Phone Extension (4 digits):
+                                    <input
+                                        type="text"
+                                        name="phoneExtension"
+                                        placeholder="e.g., 1234"
+                                        value={formData.phoneExtension}
+                                        onChange={handleChange}
+                                        maxLength="4"
+                                        pattern="[0-9]*"
+                                    />
+                                </label>
+                            </div>
+                        )}
+                    </div>
 
                     <label>
                         Current ODP:

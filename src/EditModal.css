@@ -82,8 +82,8 @@
 }
 
 .save-btn {
-    background-color: #64dd17; 
-    color: #1a1a1a;
+    background-color: #4b7f7e; 
+    color: #e8e8e8;
 }
 .reset-btn {
     background-color: #555555; /* Neutral grey tone */
@@ -101,6 +101,45 @@
     color: var(--text-primary);
     box-sizing: border-box;
     /* Ensure the text is readable against the background */
+}
+
+/* Advanced Settings Dropdown */
+.advanced-settings {
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.advanced-toggle {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-input);
+    color: var(--text-tertiary);
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95em;
+    transition: background-color 0.2s;
+}
+
+.advanced-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.advanced-content {
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--border-color);
+}
+
+.advanced-content label {
+    margin-bottom: 15px;
+}
+
+.advanced-content label:last-child {
+    margin-bottom: 0;
 }
 
 /* --- Responsive scaling for 1920x1080 and larger screens --- */
