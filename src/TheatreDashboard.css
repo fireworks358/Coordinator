@@ -176,6 +176,7 @@ body.light-theme {
 
 .theme-toggle-btn,
 .staff-panel-toggle-btn,
+.practitioner-sidebar-toggle-btn,
 .filter-toggle-btn,
 .clear-all-btn {
     padding: 8px 15px;
@@ -192,7 +193,15 @@ body.light-theme {
 }
 
 .staff-panel-toggle-btn:hover {
-    background-color: #345a59;
+    background-color: #5a9493;
+}
+
+.practitioner-sidebar-toggle-btn {
+    background-color: #4b7f7e;
+}
+
+.practitioner-sidebar-toggle-btn:hover {
+    background-color: rgb(3, 122, 137);
 }
 
 .staff-overview-popup {
@@ -220,7 +229,7 @@ body.light-theme {
 .staff-overview-popup button {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #d50000;
+    background-color: #4b7f7e;
     color: white;
     border: none;
     border-radius: 5px;
@@ -252,13 +261,13 @@ body.light-theme {
 }
 
 .tab-button:hover:not(.active) {
-    background-color: #555;
+    background-color: #5fa1a0;
     color: var(--text-primary);
 }
 
 .tab-button.active {
-    background-color: var(--border-accent);
-    color: #1a1a1a;
+    background-color: #60a4a3;
+    color: #ffffff;
     font-weight: bold;
 }
 
@@ -386,6 +395,7 @@ body.light-theme {
     .upload-data-label,
     .theme-toggle-btn,
     .staff-panel-toggle-btn,
+    .practitioner-sidebar-toggle-btn,
     .filter-toggle-btn,
     .clear-all-btn {
         padding: 9px 15px;

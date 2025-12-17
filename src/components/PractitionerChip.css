@@ -1,0 +1,89 @@
+.practitioner-chip {
+  background-color: var(--bg-button);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  cursor: move;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.practitioner-chip:hover:not(.allocated) {
+  border-color: var(--border-accent);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px var(--shadow-tile);
+}
+
+.practitioner-chip.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.practitioner-chip.allocated {
+  opacity: 0.5;
+  background-color: var(--bg-tile-neutral);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.practitioner-chip.allocated .chip-name {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+.chip-name {
+  font-weight: 600;
+  font-size: 1.05em;
+  color: var(--text-primary);
+}
+
+.chip-end-time {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+}
+
+.chip-allocated-indicator {
+  font-size: 0.85em;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* --- Time-based color coding --- */
+.practitioner-chip.time-earlies {
+  border-left: 4px solid #72d37f;
+  background: linear-gradient(to right, rgba(70, 166, 78, 0.15), var(--bg-button));
+}
+
+.practitioner-chip.time-earlies:hover:not(.allocated) {
+  background: linear-gradient(to right, rgba(76, 175, 80, 0.25), var(--bg-tertiary));
+}
+
+.practitioner-chip.time-1730s {
+  border-left: 4px solid #2e22d3;
+  background: linear-gradient(to right, rgba(0, 17, 255, 0.15), var(--bg-button));
+}
+
+.practitioner-chip.time-1730s:hover:not(.allocated) {
+  background: linear-gradient(to right, rgba(255, 152, 0, 0.25), var(--bg-tertiary));
+}
+
+.practitioner-chip.time-1830s {
+  border-left: 4px solid #f4c136;
+  background: linear-gradient(to right, rgba(244, 162, 54, 0.15), var(--bg-button));
+}
+
+.practitioner-chip.time-1830s:hover:not(.allocated) {
+  background: linear-gradient(to right, rgba(244, 174, 54, 0.25), var(--bg-tertiary));
+}
+
+.practitioner-chip.time-lates {
+  border-left: 4px solid #b02727;
+  background: linear-gradient(to right, rgba(176, 39, 39, 0.15), var(--bg-button));
+}
+
+.practitioner-chip.time-lates:hover:not(.allocated) {
+  background: linear-gradient(to right, rgba(176, 39, 39, 0.25), var(--bg-tertiary));
+}

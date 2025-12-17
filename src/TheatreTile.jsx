@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './TheatreTile.css';
 
 // --- CORE COLOR LOGIC (Uses theatreEta and new status) ---
@@ -32,7 +32,10 @@ const getNextStatus = (currentStatus) => {
     }
 };
 
-const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings }) => {
+const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings, onPractitionerDrop }) => {
+
+    // Drag-over state for drop target visual feedback
+    const [isDragOver, setIsDragOver] = useState(false);
 
     // Status is now used for both color and toggle logic
     const tileStatusClass = getTileColor(theatreEta, status, currentOdp);
@@ -74,11 +77,55 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
             buttonText = 'Set Status';
     }
 
+    // Drag and drop handlers for tile as drop target
+    const handleDragOver = (e) => {
+        e.preventDefault(); // Required to allow drop
+        e.dataTransfer.dropEffect = 'move';
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e) => {
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+
+        try {
+            const data = JSON.parse(e.dataTransfer.getData('application/json'));
+
+            if (data.type === 'PRACTITIONER') {
+                // Practitioner dragged from sidebar
+                onPractitionerDrop(name, data.practitionerName, data.practitionerEndTime);
+            } else if (data.type === 'TILE_DEALLOCATION') {
+                // Practitioner dragged from another tile (reassignment)
+                onPractitionerDrop(name, data.practitionerName, data.practitionerEndTime, data.sourceTile);
+            }
+        } catch (error) {
+            console.error('Error parsing drop data:', error);
+        }
+    };
+
+    // Drag handler for current ODP (make it draggable for deallocation/reassignment)
+    const handleOdpDragStart = (e) => {
+        e.stopPropagation(); // Prevent tile click
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            type: 'TILE_DEALLOCATION',
+            sourceTile: name,
+            practitionerName: currentOdp,
+            practitionerEndTime: practitionerEndTime
+        }));
+    };
+
     return (
         <div
-            className={`theatre-tile ${tileStatusClass}`}
-            // Allow tile click to open modal, but prevent if practitioner is empty
+            className={`theatre-tile ${tileStatusClass} ${isDragOver ? 'drag-over' : ''}`}
             onClick={() => handleTileClick(name)}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
         >
             <div className="header">
                 <span className="theatre-name">{name}</span>
@@ -88,7 +135,12 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
             <div className="content">
                 {currentOdp ? (
                     <>
-                        <p className={`practitioner-info ${getPractitionerTimeClass(practitionerEndTime)}`}>
+                        <p
+                            className={`practitioner-info ${getPractitionerTimeClass(practitionerEndTime)}`}
+                            draggable={currentOdp ? true : false}
+                            onDragStart={handleOdpDragStart}
+                            style={{ cursor: currentOdp ? 'move' : 'default' }}
+                        >
                             {currentOdp} {practitionerEndTime}
                         </p>
 

@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import TheatreTile from './TheatreTile.jsx';
 import EditModal from './EditModal.jsx';
+import PractitionerSidebar from './components/PractitionerSidebar.jsx';
 import './TheatreDashboard.css';
 import { useTheatreData } from './hooks/useTheatreData.js';
 import { usePractitionerData } from './hooks/usePractitionerData.js';
@@ -22,6 +23,10 @@ const TheatreDashboard = () => {
     const [activeTab, setActiveTab] = useState('17:30s');
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }));
     const [isHighlightPanelVisible, setIsHighlightPanelVisible] = useState(false);
+
+    // Practitioner Sidebar States
+    const [isPractitionerSidebarVisible, setIsPractitionerSidebarVisible] = useState(false);
+    const [sidebarPosition, setSidebarPosition] = useState('right');
 
     // Update time every second
     useEffect(() => {
@@ -293,13 +298,52 @@ const TheatreDashboard = () => {
     const handleHighlightToggle = (setting) => {
         updateHighlightSetting(setting);
     };
-    
+
+    // Compute allocated practitioners from theatres
+    const allocatedPractitioners = useMemo(() => {
+        const allocated = new Set();
+        theatres.forEach(theatre => {
+            if (theatre.currentOdp) {
+                allocated.add(theatre.currentOdp);
+            }
+        });
+        return allocated;
+    }, [theatres]);
+
+    // Handle practitioner drop (allocation and reassignment)
+    const handlePractitionerDrop = useCallback((targetTheatreName, practitionerName, practitionerEndTime, sourceTheatreName = null) => {
+        // If reassigning from another tile, clear the source first
+        if (sourceTheatreName) {
+            updateTheatre(sourceTheatreName, {
+                currentOdp: '',
+                practitionerEndTime: '',
+                status: 'Not Running'
+            });
+        }
+
+        // Allocate to target
+        updateTheatre(targetTheatreName, {
+            currentOdp: practitionerName,
+            practitionerEndTime: practitionerEndTime,
+            status: 'Running'
+        });
+    }, [updateTheatre]);
+
+    // Handle practitioner deallocation
+    const handlePractitionerDeallocate = useCallback((theatreName) => {
+        updateTheatre(theatreName, {
+            currentOdp: '',
+            practitionerEndTime: '',
+            status: 'Not Running'
+        });
+    }, [updateTheatre]);
+
     // Updated filter logic: Show only Running when filter is active
     const filteredTheatres = useMemo(() => {
         if (showAll) {
             return theatres;
         }
-        return theatres.filter(t => t.status === 'Running'); 
+        return theatres.filter(t => t.status === 'Running');
     }, [theatres, showAll]);
 
     const group1 = filteredTheatres.slice(0, 11); 
@@ -379,15 +423,22 @@ const TheatreDashboard = () => {
                     >
                         {isStaffPanelVisible ? 'Hide Staff Overview' : 'Show Staff Overview'}
                     </button>
+
+                    <button
+                        className="practitioner-sidebar-toggle-btn"
+                        onClick={() => setIsPractitionerSidebarVisible(!isPractitionerSidebarVisible)}
+                    >
+                        {isPractitionerSidebarVisible ? 'Hide Practitioner Sidebar' : 'Show Practitioner Sidebar'}
+                    </button>
                 </div>
             </div>
 
             <div className="theatre-grid-full-width">
                 <div className="theatre-rows-wrapper">
-                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
-                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
-                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
-                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} />)}</div>
+                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
+                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
+                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
+                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
                 </div>
 
                 {/* Highlight Settings Toggle Button - Bottom Right Corner */}
@@ -463,7 +514,7 @@ const TheatreDashboard = () => {
                                         // Determine checkbox visibility based on tab
                                         const endTime = p.endTime.replace(':', '');
                                         const endNumeric = parseInt(endTime, 10);
-                                        const isEarly = endNumeric >= 900 && endNumeric <= 1700;
+                                        const isEarly = endNumeric >= 900 && endNumeric <= 1701;
                                         const is1730 = endTime === '1730';
                                         const isLate = endTime === '2000';
 
@@ -519,6 +570,19 @@ const TheatreDashboard = () => {
 
                         <button onClick={() => setIsStaffPanelVisible(false)}>Close</button>
                     </div>
+                )}
+
+                {/* Practitioner Sidebar */}
+                {isPractitionerSidebarVisible && (
+                    <PractitionerSidebar
+                        practitionerList={practitionerList}
+                        allocatedPractitioners={allocatedPractitioners}
+                        isVisible={isPractitionerSidebarVisible}
+                        position={sidebarPosition}
+                        onTogglePosition={() => setSidebarPosition(prev => prev === 'left' ? 'right' : 'left')}
+                        onClose={() => setIsPractitionerSidebarVisible(false)}
+                        onPractitionerDeallocate={handlePractitionerDeallocate}
+                    />
                 )}
             </div>
 

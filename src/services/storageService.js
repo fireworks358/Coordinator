@@ -4,14 +4,23 @@
 import firebaseService from './firebaseService.js';
 import { safeStringify, safeParse } from './dataTransformers.js';
 
+// ===== FIREBASE TOGGLE =====
+// Set to false to use localStorage only (no Firebase)
+const USE_FIREBASE = true; // Change to true to re-enable Firebase
+// ===========================
+
 /**
  * Storage Service Class
  * Provides unified interface for data operations with automatic fallback
  */
 class StorageService {
   constructor() {
-    this.mode = 'firebase'; // 'firebase' or 'localStorage'
-    this.initializeConnectionMonitoring();
+    this.mode = USE_FIREBASE ? 'firebase' : 'localStorage';
+    if (USE_FIREBASE) {
+      this.initializeConnectionMonitoring();
+    } else {
+      console.log('Firebase disabled - using localStorage only');
+    }
   }
 
   /**

@@ -1,0 +1,178 @@
+.practitioner-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 320px;
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-accent);
+  box-shadow: 0 0 20px var(--shadow-tile);
+  z-index: 1500;
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.practitioner-sidebar.left {
+  left: 0;
+  transform: translateX(0);
+  border-right: 2px solid var(--border-accent);
+  border-left: none;
+}
+
+.practitioner-sidebar.left.hidden {
+  transform: translateX(-100%);
+}
+
+.practitioner-sidebar.right {
+  right: 0;
+  transform: translateX(0);
+  border-left: 2px solid var(--border-accent);
+  border-right: none;
+}
+
+.practitioner-sidebar.right.hidden {
+  transform: translateX(100%);
+}
+
+.practitioner-sidebar.drag-over {
+  background-color: var(--bg-tertiary);
+  border-color: #ff9800;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.sidebar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.95em;
+}
+
+.filter-toggle input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.position-toggle-btn {
+  background-color: var(--bg-button);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.position-toggle-btn:hover {
+  border-color: var(--border-accent);
+  background-color: var(--bg-tertiary);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.practitioner-count {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  margin-bottom: 15px;
+}
+
+.practitioner-chips {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-state {
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: center;
+  margin-top: 40px;
+  padding: 0 20px;
+}
+
+.drop-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #4b7f7e;
+  color: white;
+  padding: 20px 40px;
+  border-radius: 8px;
+  font-size: 1.2em;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-accent);
+}

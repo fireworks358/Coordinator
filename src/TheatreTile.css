@@ -255,3 +255,24 @@ body {
         opacity: 1
     }
 }
+
+/* --- Drag and Drop Styles --- */
+.theatre-tile.drag-over {
+    border: 3px dashed var(--border-accent);
+    box-shadow: 0 0 15px rgba(0, 188, 212, 0.5);
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+.practitioner-info[draggable="true"] {
+    cursor: move;
+    user-select: none;
+}
+
+.practitioner-info[draggable="true"]:hover {
+    opacity: 0.8;
+}
+
+.practitioner-info[draggable="true"]:active {
+    cursor: grabbing;
+}
