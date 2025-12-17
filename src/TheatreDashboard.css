@@ -82,7 +82,7 @@ body.light-theme {
 }
 
 .main-header h1 {
-    font-size: 1.3em;
+    font-size: 2em;
     font-weight: 600;
     margin: 0;
     color: var(--text-secondary);
@@ -138,14 +138,16 @@ body.light-theme {
 .upload-data-label,
 .download-data-btn {
     display: inline-block;
-    padding: 8px 15px;
+    padding: 6px 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-weight: 500;
-    font-size: 0.9em;
+    font-size: 0.85em;
+    line-height: 1.4;
     color: white;
     transition: background-color 0.2s;
+    vertical-align: middle;
 }
 
 .upload-label,
@@ -179,13 +181,16 @@ body.light-theme {
 .practitioner-sidebar-toggle-btn,
 .filter-toggle-btn,
 .clear-all-btn {
-    padding: 8px 15px;
+    padding: 6px 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-weight: 500;
+    font-size: 0.85em;
+    line-height: 1.4;
     transition: background-color 0.2s;
     color: white;
+    vertical-align: middle;
 }
 
 .staff-panel-toggle-btn {
@@ -237,6 +242,63 @@ body.light-theme {
 }
 
 
+/* --- LUNCH OVERVIEW SECTION --- */
+.lunch-overview {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 2px solid #ff9800;
+}
+
+.lunch-overview h3 {
+    margin: 0 0 10px 0;
+    color: #ff9800;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.lunch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.lunch-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--bg-secondary);
+    border-radius: 5px;
+    border-left: 3px solid #4caf50;
+    transition: background-color 0.2s;
+}
+
+.lunch-item:hover {
+    background-color: var(--bg-button);
+}
+
+.lunch-item.cepod {
+    border-left-color: #ff9800;
+    background-color: rgba(255, 152, 0, 0.1);
+}
+
+.lunch-theatre {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95em;
+}
+
+.lunch-time {
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-size: 0.9em;
+    font-family: monospace;
+}
+
 /* --- TAB STYLING (UNCHANGED) --- */
 .tab-navigation {
     display: flex;
@@ -244,7 +306,7 @@ body.light-theme {
     border-bottom: 2px solid #333;
     margin-bottom: 15px;
     padding-bottom: 5px;
-    overflow-x: auto; 
+    overflow-x: auto;
 }
 
 .tab-button {
@@ -372,12 +434,14 @@ body.light-theme {
     }
 
     .main-header h1 {
-        font-size: 2.5em;
+        font-size: 3em;
         text-align: left;
+        color: #244848
     }
 
     .time-display {
         font-size: 3em;
+        color: #244848
     }
 
     .main-header {
@@ -398,8 +462,8 @@ body.light-theme {
     .practitioner-sidebar-toggle-btn,
     .filter-toggle-btn,
     .clear-all-btn {
-        padding: 9px 15px;
-        font-size: 0.95em;
+        padding: 7px 13px;
+        font-size: 0.9em;
     }
 
     /* Scale up modals */

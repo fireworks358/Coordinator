@@ -8,7 +8,9 @@ const defaultHighlightSettings = {
   highlightEarlies: true,
   highlight1730s: true,
   highlight1830s: true,
-  highlightLates: true
+  highlightLates: true,
+  highlightPendingLunch: false,
+  highlightFulfilledLunch: false
 };
 
 /**

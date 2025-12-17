@@ -32,13 +32,26 @@ const getNextStatus = (currentStatus) => {
     }
 };
 
-const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings, onPractitionerDrop }) => {
+const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings, onPractitionerDrop, lunchStatus }) => {
 
     // Drag-over state for drop target visual feedback
     const [isDragOver, setIsDragOver] = useState(false);
 
     // Status is now used for both color and toggle logic
     const tileStatusClass = getTileColor(theatreEta, status, currentOdp);
+
+    // Determine lunch request highlight classes
+    const lunchHighlightClass = () => {
+        if (!lunchStatus || !highlightSettings) return '';
+
+        if (highlightSettings.highlightPendingLunch && lunchStatus.hasPendingLunch) {
+            return 'lunch-pending';
+        }
+        if (highlightSettings.highlightFulfilledLunch && lunchStatus.hasFulfilledLunch) {
+            return 'lunch-fulfilled';
+        }
+        return '';
+    };
 
     // Determine practitioner time highlight class based on settings
     const getPractitionerTimeClass = (endTime) => {
@@ -121,7 +134,7 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
 
     return (
         <div
-            className={`theatre-tile ${tileStatusClass} ${isDragOver ? 'drag-over' : ''}`}
+            className={`theatre-tile ${tileStatusClass} ${isDragOver ? 'drag-over' : ''} ${lunchHighlightClass()}`}
             onClick={() => handleTileClick(name)}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}

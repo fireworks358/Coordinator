@@ -32,12 +32,12 @@ body {
 */
 @media (min-width: 1920px) {
     .theatre-tile {
-        width: 142px;
+        width: 148px;
         min-width: 140px;
         height: 145px;
         padding: 6px 5px;
         padding-bottom: 36px; /* keep space on large screens */
-        margin-left: 9px;
+        margin-left: 2px;
         margin-bottom: 0px;
     }
 }
@@ -68,6 +68,33 @@ body {
 .theatre-tile.high-risk-red {
     background-color: #b54148;
     color: white;
+}
+
+/* --- Lunch Request Highlights --- */
+.theatre-tile.lunch-pending {
+    box-shadow: 0 0 0 3px #ff9800, 0 4px 10px var(--shadow-tile);
+    animation: pulse-orange 2s ease-in-out infinite;
+}
+
+.theatre-tile.lunch-pending:hover {
+    box-shadow: 0 0 0 3px #ff9800, 0 8px 15px var(--shadow-tile-hover);
+}
+
+.theatre-tile.lunch-fulfilled {
+    box-shadow: 0 0 0 3px #4caf50, 0 4px 10px var(--shadow-tile);
+}
+
+.theatre-tile.lunch-fulfilled:hover {
+    box-shadow: 0 0 0 3px #4caf50, 0 8px 15px var(--shadow-tile-hover);
+}
+
+@keyframes pulse-orange {
+    0%, 100% {
+        box-shadow: 0 0 0 3px #ff9800, 0 4px 10px var(--shadow-tile);
+    }
+    50% {
+        box-shadow: 0 0 0 5px #ff9800, 0 4px 10px var(--shadow-tile);
+    }
 } 
 
 

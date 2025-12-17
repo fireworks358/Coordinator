@@ -1,0 +1,272 @@
+/* LunchDisplayBoard.css - Display page for viewing lunch relief requests */
+/* PERMANENT LIGHT MODE - Dashboard-like theme */
+
+.lunch-display-board {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  color: #212121;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Section */
+.display-header {
+  background-color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-bottom: 2px solid #0097a7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.display-header h1 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #212121;
+  line-height: 1.2;
+}
+
+.header-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.current-time {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0097a7;
+  letter-spacing: 0.05em;
+}
+
+.request-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #424242;
+  padding: 0.3rem 0.7rem;
+  background-color: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+}
+
+/* Main Content */
+.requests-container {
+  flex: 1;
+  padding: 0.6rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  font-size: 1rem;
+  color: #757575;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  padding: 1rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  color: #4caf50;
+  margin-bottom: 0.6rem;
+}
+
+.empty-state h2 {
+  font-size: 1.3rem;
+  color: #424242;
+  margin: 0 0 0.3rem 0;
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  color: #757575;
+}
+
+/* Requests List - Vertical Only */
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Request Card - Compact for 10+ items, Always Green */
+.request-card {
+  background-color: rgba(76, 175, 80, 0.08);
+  border-radius: 6px;
+  padding: 0.7rem 0.9rem;
+  border-left: 4px solid #4caf50;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.request-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* CEPOD & Trauma cards - Orange background */
+.request-card.cepod-trauma {
+  background-color: rgba(255, 152, 0, 0.15);
+  border-left-color: #ff9800;
+}
+
+.request-card.cepod-trauma:hover {
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.2);
+}
+
+/* Request Header - Title and Time on same line */
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+
+.request-theatre-name {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #212121;
+}
+
+.request-time {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0097a7;
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+/* Fulfill Button - Compact */
+.fulfill-button {
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  background-color: #4caf50;
+  border: 2px solid #4caf50;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fulfill-button:hover {
+  background-color: #45a049;
+  border-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.fulfill-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+}
+
+/* Responsive Design - Vertical Stack Only */
+@media (min-width: 768px) {
+  .display-header h1 {
+    font-size: 2rem;
+  }
+
+  .current-time {
+    font-size: 1.3rem;
+  }
+
+  .request-count {
+    font-size: 1rem;
+  }
+
+  .request-theatre-name {
+    font-size: 1.5rem;
+  }
+
+  .request-time {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .display-header h1 {
+    font-size: 2.2rem;
+  }
+
+  .current-time {
+    font-size: 1.4rem;
+  }
+
+  .request-theatre-name {
+    font-size: 1.6rem;
+  }
+
+  .request-time {
+    font-size: 1.25rem;
+  }
+
+  .fulfill-button {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra large displays - Still vertical */
+@media (min-width: 1920px) {
+  .display-header {
+    padding: 0.7rem 1.2rem;
+  }
+
+  .display-header h1 {
+    font-size: 2.5rem;
+  }
+
+  .current-time {
+    font-size: 1.6rem;
+  }
+
+  .request-theatre-name {
+    font-size: 1.8rem;
+  }
+
+  .request-time {
+    font-size: 1.3rem;
+  }
+
+  .fulfill-button {
+    font-size: 0.95rem;
+  }
+
+  .requests-container {
+    padding: 0.8rem 1.5rem;
+  }
+}

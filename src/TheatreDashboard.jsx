@@ -6,6 +6,7 @@ import './TheatreDashboard.css';
 import { useTheatreData } from './hooks/useTheatreData.js';
 import { usePractitionerData } from './hooks/usePractitionerData.js';
 import { useTheme, useHighlightSettings } from './hooks/useSettings.js';
+import { useLunchRequests } from './hooks/useLunchRequests.js';
 import storageService from './services/storageService.js';
 
 const TheatreDashboard = () => {
@@ -14,6 +15,7 @@ const TheatreDashboard = () => {
     const { practitionerList, setPractitionerList, updatePractitioner } = usePractitionerData();
     const { theme, setTheme } = useTheme();
     const { highlightSettings, updateHighlightSetting } = useHighlightSettings();
+    const { requests } = useLunchRequests();
 
     // Existing States
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -321,13 +323,18 @@ const TheatreDashboard = () => {
             });
         }
 
-        // Allocate to target
+        // Find the target theatre to check its current status
+        const targetTheatre = theatres.find(t => t.name === targetTheatreName);
+        const wasNotRunning = targetTheatre && targetTheatre.status === 'Not Running';
+
+        // Allocate to target, setting ETA to 17:30 if it was not running
         updateTheatre(targetTheatreName, {
             currentOdp: practitionerName,
             practitionerEndTime: practitionerEndTime,
-            status: 'Running'
+            status: 'Running',
+            ...(wasNotRunning && { theatreEta: '17:30' })
         });
-    }, [updateTheatre]);
+    }, [updateTheatre, theatres]);
 
     // Handle practitioner deallocation
     const handlePractitionerDeallocate = useCallback((theatreName) => {
@@ -337,6 +344,21 @@ const TheatreDashboard = () => {
             status: 'Not Running'
         });
     }, [updateTheatre]);
+
+    // Get lunch request status for each theatre
+    const getLunchStatus = useCallback((theatreName) => {
+        const pendingRequest = requests.find(
+            req => req.theatreName === theatreName && req.status === 'pending'
+        );
+        const fulfilledRequest = requests.find(
+            req => req.theatreName === theatreName && req.status === 'fulfilled'
+        );
+
+        return {
+            hasPendingLunch: !!pendingRequest,
+            hasFulfilledLunch: !!fulfilledRequest && !pendingRequest
+        };
+    }, [requests]);
 
     // Updated filter logic: Show only Running when filter is active
     const filteredTheatres = useMemo(() => {
@@ -358,7 +380,7 @@ const TheatreDashboard = () => {
                 <div className="data-control-group-left">
                     <div className="csv-upload-container">
                         <label htmlFor="csv-upload" className="upload-label">
-                            Upload Staff CSV ⬆️
+                            Upload CSV
                         </label>
                         <input
                             type="file"
@@ -372,12 +394,12 @@ const TheatreDashboard = () => {
                         className="download-data-btn"
                         onClick={handleDownload}
                     >
-                        Download State ↓
+                        Download State
                     </button>
 
                     <div className="upload-data-container">
                         <label htmlFor="data-upload" className="upload-data-label">
-                            Upload State ↑
+                            Upload State
                         </label>
                         <input
                             type="file"
@@ -414,7 +436,7 @@ const TheatreDashboard = () => {
                         className="filter-toggle-btn"
                         onClick={() => setShowAll(!showAll)}
                     >
-                        {showAll ? 'Show Only Running' : 'Show All Theatres'}
+                        {showAll ? 'Hide Finished' : 'Show Finished'}
                     </button>
 
                     <button
@@ -428,17 +450,17 @@ const TheatreDashboard = () => {
                         className="practitioner-sidebar-toggle-btn"
                         onClick={() => setIsPractitionerSidebarVisible(!isPractitionerSidebarVisible)}
                     >
-                        {isPractitionerSidebarVisible ? 'Hide Practitioner Sidebar' : 'Show Practitioner Sidebar'}
+                        {isPractitionerSidebarVisible ? 'Hide Allocate' : 'Show Allocate'}
                     </button>
                 </div>
             </div>
 
             <div className="theatre-grid-full-width">
                 <div className="theatre-rows-wrapper">
-                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
-                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
-                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
-                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} />)}</div>
+                    <div className="theatre-row">{group1.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} lunchStatus={getLunchStatus(t.name)} />)}</div>
+                    <div className="theatre-row">{group2.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} lunchStatus={getLunchStatus(t.name)} />)}</div>
+                    <div className="theatre-row">{group3.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} lunchStatus={getLunchStatus(t.name)} />)}</div>
+                    <div className="theatre-row specialized-row">{group4_Specialized.map(t => <TheatreTile key={t.name} {...t} handleTileClick={handleTileClick} handleStatusToggle={handleStatusToggle} highlightSettings={highlightSettings} onPractitionerDrop={handlePractitionerDrop} lunchStatus={getLunchStatus(t.name)} />)}</div>
                 </div>
 
                 {/* Highlight Settings Toggle Button - Bottom Right Corner */}
@@ -485,6 +507,22 @@ const TheatreDashboard = () => {
                             />
                             Highlight Lates? (20:00)
                         </label>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlightPendingLunch}
+                                onChange={() => handleHighlightToggle('highlightPendingLunch')}
+                            />
+                            Highlight Pending Lunch?
+                        </label>
+                        <label className="highlight-option">
+                            <input
+                                type="checkbox"
+                                checked={highlightSettings.highlightFulfilledLunch}
+                                onChange={() => handleHighlightToggle('highlightFulfilledLunch')}
+                            />
+                            Highlight Fulfilled Lunch?
+                        </label>
                     </div>
                 )}
 
@@ -492,7 +530,37 @@ const TheatreDashboard = () => {
                 {isStaffPanelVisible && (
                     <div className="staff-overview-popup">
                         <h2>Staffing Overview ({practitionerList.length} Total Staff)</h2>
-                        
+
+                        {/* Pending Lunch Requests Overview */}
+                        {requests.filter(req => req.status === 'pending').length > 0 && (
+                            <div className="lunch-overview">
+                                <h3>Pending Lunch Requests ({requests.filter(req => req.status === 'pending').length})</h3>
+                                <div className="lunch-list">
+                                    {requests
+                                        .filter(req => req.status === 'pending')
+                                        .sort((a, b) => a.timestamp - b.timestamp)
+                                        .map((request) => {
+                                            const requestTime = new Date(request.timestamp).toLocaleTimeString('en-GB', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: false
+                                            });
+                                            const isCepod = request.theatreName.toUpperCase().includes('E13') ||
+                                                          request.theatreName.toUpperCase().includes('E14') ||
+                                                          request.theatreName.toUpperCase().includes('E17') ||
+                                                          request.theatreName.toUpperCase().includes('E18');
+
+                                            return (
+                                                <div key={request.id} className={`lunch-item ${isCepod ? 'cepod' : ''}`}>
+                                                    <span className="lunch-theatre">{request.theatreName}</span>
+                                                    <span className="lunch-time">{requestTime}</span>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="tab-navigation">
                             {['Earlies', '17:30s', '18:30s', 'Lates', 'Nights', 'All Staff'].map(tab => (
                                 <button
