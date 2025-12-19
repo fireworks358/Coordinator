@@ -363,6 +363,52 @@ class StorageService {
     return () => {};
   }
 
+  // ==================== ROSTER DATE OPERATIONS ====================
+
+  /**
+   * Get roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<string|null>} Roster date string or null
+   */
+  async getRosterDateForDay(dayOfWeek) {
+    if (this.isFirebaseAvailable()) {
+      try {
+        return await firebaseService.getRosterDateForDay(dayOfWeek);
+      } catch (error) {
+        console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
+      }
+    }
+
+    // Fallback to localStorage
+    const data = this.loadFromLocalStorage('rosterDatesByDay', {});
+    console.log(`[StorageService] Loading roster date for ${dayOfWeek} from localStorage:`, data[dayOfWeek]);
+    return data[dayOfWeek] || null;
+  }
+
+  /**
+   * Set roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {string} rosterDate - Roster date string
+   * @returns {Promise<void>}
+   */
+  async setRosterDateForDay(dayOfWeek, rosterDate) {
+    console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate);
+
+    // Save to localStorage
+    const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
+    allData[dayOfWeek] = rosterDate;
+    this.saveToLocalStorage('rosterDatesByDay', allData);
+
+    // Save to Firebase if available
+    if (this.isFirebaseAvailable()) {
+      try {
+        await firebaseService.setRosterDateForDay(dayOfWeek, rosterDate);
+      } catch (error) {
+        console.error(`Error saving roster date for ${dayOfWeek} to Firebase:`, error);
+      }
+    }
+  }
+
   // ==================== SETTINGS OPERATIONS ====================
 
   /**
@@ -557,6 +603,7 @@ class StorageService {
       return {
         theatresByDay,
         practitionersByDay,
+        rosterDatesByDay: this.loadFromLocalStorage('rosterDatesByDay', {}),
         theme: this.loadFromLocalStorage('theme', 'dark'),
         highlightSettings: this.loadFromLocalStorage('highlightSettings', {
           highlightEarlies: true,
@@ -592,6 +639,9 @@ class StorageService {
     if (data.theatresByDay && data.practitionersByDay) {
       this.saveToLocalStorage('theatresByDay', data.theatresByDay);
       this.saveToLocalStorage('practitionersByDay', data.practitionersByDay);
+      if (data.rosterDatesByDay) {
+        this.saveToLocalStorage('rosterDatesByDay', data.rosterDatesByDay);
+      }
       if (data.selectedDay) {
         this.saveToLocalStorage('selectedDay', data.selectedDay);
       }

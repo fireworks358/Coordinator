@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './PractitionerChip.css';
+import PractitionerContextMenu from './PractitionerContextMenu.jsx';
 
-const PractitionerChip = ({ practitioner, isAllocated }) => {
+const PractitionerChip = ({ practitioner, isAllocated, onToggleSick }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
 
   // Determine color class based on end time
   const getTimeColorClass = (endTime) => {
@@ -34,19 +36,41 @@ const PractitionerChip = ({ practitioner, isAllocated }) => {
     setIsDragging(false);
   };
 
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
   const timeColorClass = getTimeColorClass(practitioner.endTime);
+  const isDraggable = !isAllocated && !practitioner.sick;
 
   return (
-    <div
-      className={`practitioner-chip ${timeColorClass} ${isDragging ? 'dragging' : ''} ${isAllocated ? 'allocated' : ''}`}
-      draggable={!isAllocated}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="chip-name">{practitioner.name}</div>
-      <div className="chip-end-time">End Time: {practitioner.endTime}</div>
-      {isAllocated && <div className="chip-allocated-indicator">(Allocated)</div>}
-    </div>
+    <>
+      <div
+        className={`practitioner-chip ${timeColorClass} ${isDragging ? 'dragging' : ''} ${isAllocated ? 'allocated' : ''} ${practitioner.sick ? 'sick' : ''}`}
+        draggable={isDraggable}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onContextMenu={handleContextMenu}
+      >
+        <div className="chip-name">{practitioner.name}</div>
+        <div className="chip-end-time">End Time: {practitioner.endTime}</div>
+        {isAllocated && <div className="chip-allocated-indicator">(Allocated)</div>}
+        {practitioner.sick && <div className="chip-sick-indicator">(Sick)</div>}
+      </div>
+
+      {contextMenu && (
+        <PractitionerContextMenu
+          practitioner={practitioner}
+          position={contextMenu}
+          onToggleSick={onToggleSick}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+    </>
   );
 };
 

@@ -5,8 +5,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import storageService from '../services/storageService.js';
 
 const defaultPractitioners = [
-    { name: 'M Varghese', endTime: '17:30', relieved: false, supper: false },
-    { name: 'K Bevis', endTime: '18:00', relieved: false, supper: false },
+    { name: 'M Varghese', endTime: '17:30', relieved: false, supper: false, sick: false },
+    { name: 'K Bevis', endTime: '18:00', relieved: false, supper: false, sick: false },
 ];
 
 /**
@@ -38,11 +38,12 @@ export const usePractitionerData = (selectedDay) => {
 
         if (mounted) {
           if (initialData.length > 0) {
-            // Ensure all practitioners have relieved and supper properties
+            // Ensure all practitioners have relieved, supper, and sick properties
             const migratedData = initialData.map(p => ({
               ...p,
               relieved: p.relieved ?? false,
-              supper: p.supper ?? false
+              supper: p.supper ?? false,
+              sick: p.sick ?? false
             }));
             isFirebaseUpdate.current = true;
             console.log(`[usePractitionerData] Setting ${migratedData.length} practitioners for ${selectedDay}`);
@@ -67,11 +68,12 @@ export const usePractitionerData = (selectedDay) => {
       try {
         unsubscribeRef.current = storageService.subscribeToPractitionersForDay(selectedDay, (updatedPractitioners) => {
           if (mounted && updatedPractitioners.length > 0) {
-            // Ensure all practitioners have relieved and supper properties
+            // Ensure all practitioners have relieved, supper, and sick properties
             const migratedData = updatedPractitioners.map(p => ({
               ...p,
               relieved: p.relieved ?? false,
-              supper: p.supper ?? false
+              supper: p.supper ?? false,
+              sick: p.sick ?? false
             }));
             isFirebaseUpdate.current = true;
             setPractitionerList(migratedData);

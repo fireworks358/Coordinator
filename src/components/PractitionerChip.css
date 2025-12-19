@@ -34,6 +34,42 @@
   color: var(--text-tertiary);
 }
 
+/* Sick practitioner styling */
+.practitioner-chip.sick {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.25), rgba(255, 121, 121, 0.15));
+  border: 2px solid #ff5252;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.practitioner-chip.sick .chip-name {
+  text-decoration: line-through;
+  color: #d32f2f;
+}
+
+.practitioner-chip.sick:hover {
+  transform: none; /* Disable hover transform for sick practitioners */
+  box-shadow: none;
+}
+
+.chip-sick-indicator {
+  font-size: 0.85em;
+  color: #d32f2f;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Sick styling overrides allocated styling */
+.practitioner-chip.sick.allocated {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.25), rgba(255, 121, 121, 0.15));
+  border: 2px solid #ff5252;
+  opacity: 0.85;
+}
+
+.practitioner-chip.sick.allocated .chip-name {
+  color: #d32f2f;
+}
+
 .chip-name {
   font-weight: 600;
   font-size: 1.05em;

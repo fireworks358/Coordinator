@@ -9,7 +9,8 @@ const PractitionerSidebar = ({
   position,
   onTogglePosition,
   onClose,
-  onPractitionerDeallocate
+  onPractitionerDeallocate,
+  onToggleSick
 }) => {
   const [showAllPractitioners, setShowAllPractitioners] = useState(false);
   const [isSidebarDragOver, setIsSidebarDragOver] = useState(false);
@@ -98,6 +99,7 @@ const PractitionerSidebar = ({
                 key={index}
                 practitioner={practitioner}
                 isAllocated={allocatedPractitioners.has(practitioner.name)}
+                onToggleSick={onToggleSick}
               />
             ))
           ) : (
