@@ -46,30 +46,47 @@ const initialTheatreData = [
 
 /**
  * Custom hook for managing theatre data with Firebase real-time sync
+ * @param {string} selectedDay - Day of week (e.g., 'monday')
  * @returns {Object} { theatres, setTheatres, updateTheatre, isLoading }
  */
-export const useTheatreData = () => {
+export const useTheatreData = (selectedDay) => {
   const [theatres, setTheatres] = useState(initialTheatreData);
   const [isLoading, setIsLoading] = useState(true);
   const isFirebaseUpdate = useRef(false);
   const unsubscribeRef = useRef(null);
+  const previousDayRef = useRef(selectedDay);
 
   // Load initial data and subscribe to updates
   useEffect(() => {
     let mounted = true;
 
+    // Reset loading state when day changes
+    setIsLoading(true);
+
+    console.log(`[useTheatreData] Effect running for day: ${selectedDay}`);
+
     const initializeTheatres = async () => {
       try {
-        // Load initial data from storage
-        const initialData = await storageService.getTheatres();
-        if (mounted && initialData.length > 0) {
-          // Ensure theatres have order field and sort by it
-          const sortedData = initialData.map((t, index) => ({
-            ...t,
-            order: t.order !== undefined ? t.order : index
-          })).sort((a, b) => a.order - b.order);
-          isFirebaseUpdate.current = true;
-          setTheatres(sortedData);
+        // Load initial data from storage for selected day
+        const initialData = await storageService.getTheatresForDay(selectedDay);
+        console.log(`[useTheatreData] Loaded ${initialData.length} theatres for ${selectedDay}`);
+
+        if (mounted) {
+          if (initialData.length > 0) {
+            // Ensure theatres have order field and sort by it
+            const sortedData = initialData.map((t, index) => ({
+              ...t,
+              order: t.order !== undefined ? t.order : index
+            })).sort((a, b) => a.order - b.order);
+            isFirebaseUpdate.current = true;
+            console.log(`[useTheatreData] Setting ${sortedData.length} theatres for ${selectedDay}`);
+            setTheatres(sortedData);
+          } else {
+            // Use default template if no data for this day
+            isFirebaseUpdate.current = true;
+            console.log(`[useTheatreData] No data for ${selectedDay}, using default template`);
+            setTheatres(initialTheatreData);
+          }
         }
       } catch (error) {
         console.error('Error loading initial theatre data:', error);
@@ -79,10 +96,10 @@ export const useTheatreData = () => {
         }
       }
 
-      // Subscribe to real-time updates
+      // Subscribe to real-time updates for selected day
       // Always subscribe - Firebase listeners work even when not connected yet
       try {
-        unsubscribeRef.current = storageService.subscribeToTheatres((updatedTheatres) => {
+        unsubscribeRef.current = storageService.subscribeToTheatresForDay(selectedDay, (updatedTheatres) => {
           if (mounted && updatedTheatres.length > 0) {
             // Ensure theatres have order field and sort by it
             const sortedData = updatedTheatres.map((t, index) => ({
@@ -107,22 +124,33 @@ export const useTheatreData = () => {
         unsubscribeRef.current();
       }
     };
-  }, []);
+  }, [selectedDay]); // Re-run when selected day changes
 
   // Save theatres when they change (but not on Firebase updates to prevent loops)
   useEffect(() => {
     if (isFirebaseUpdate.current) {
+      console.log(`[useTheatreData] Skipping save - Firebase update flag set`);
       isFirebaseUpdate.current = false;
+      return;
+    }
+
+    // Check if day changed - if so, don't save (we're loading new day's data)
+    if (previousDayRef.current !== selectedDay) {
+      console.log(`[useTheatreData] Day changed from ${previousDayRef.current} to ${selectedDay} - skipping save`);
+      previousDayRef.current = selectedDay;
       return;
     }
 
     // Only save if not a Firebase update (user-initiated change)
     if (!isLoading) {
-      storageService.setTheatres(theatres).catch(error => {
+      console.log(`[useTheatreData] Saving ${theatres.length} theatres to ${selectedDay}`);
+      storageService.setTheatresForDay(selectedDay, theatres).catch(error => {
         console.error('Error saving theatres:', error);
       });
+    } else {
+      console.log(`[useTheatreData] Skipping save - still loading`);
     }
-  }, [theatres, isLoading]);
+  }, [theatres, selectedDay, isLoading]); // Re-save when day or theatres change
 
   /**
    * Update a single theatre

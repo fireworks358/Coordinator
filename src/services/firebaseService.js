@@ -187,6 +187,124 @@ class FirebaseService {
     };
   }
 
+  // ==================== DAY-BASED THEATRE OPERATIONS ====================
+
+  /**
+   * Get theatres for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<Array>} Array of theatre objects
+   */
+  async getTheatresForDay(dayOfWeek) {
+    try {
+      const theatresRef = ref(database, `${DB_PATH}/theatresByDay/${dayOfWeek}`);
+      const snapshot = await get(theatresRef);
+      return firebaseObjectToArray(snapshot.val());
+    } catch (error) {
+      console.error(`Error getting theatres for ${dayOfWeek} from Firebase:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set theatres for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Array} theatresArray - Array of theatre objects
+   * @returns {Promise<void>}
+   */
+  async setTheatresForDay(dayOfWeek, theatresArray) {
+    try {
+      const theatresRef = ref(database, `${DB_PATH}/theatresByDay/${dayOfWeek}`);
+      const theatresObject = arrayToFirebaseObject(theatresArray);
+      await set(theatresRef, theatresObject);
+    } catch (error) {
+      console.error(`Error setting theatres for ${dayOfWeek} in Firebase:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Subscribe to theatre changes for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Function} callback - Function to call when theatres change
+   * @returns {Function} Unsubscribe function
+   */
+  subscribeToTheatresForDay(dayOfWeek, callback) {
+    const theatresRef = ref(database, `${DB_PATH}/theatresByDay/${dayOfWeek}`);
+
+    const listener = onValue(theatresRef, (snapshot) => {
+      const theatresArray = firebaseObjectToArray(snapshot.val());
+      callback(theatresArray);
+    }, (error) => {
+      console.error(`Error in theatres subscription for ${dayOfWeek}:`, error);
+    });
+
+    this.listeners.set(`theatres-${dayOfWeek}`, { ref: theatresRef, listener });
+
+    return () => {
+      off(theatresRef);
+      this.listeners.delete(`theatres-${dayOfWeek}`);
+    };
+  }
+
+  // ==================== DAY-BASED PRACTITIONER OPERATIONS ====================
+
+  /**
+   * Get practitioners for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<Array>} Array of practitioner objects
+   */
+  async getPractitionersForDay(dayOfWeek) {
+    try {
+      const practitionersRef = ref(database, `${DB_PATH}/practitionersByDay/${dayOfWeek}`);
+      const snapshot = await get(practitionersRef);
+      return firebaseObjectToArray(snapshot.val());
+    } catch (error) {
+      console.error(`Error getting practitioners for ${dayOfWeek} from Firebase:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set practitioners for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Array} practitionersArray - Array of practitioner objects
+   * @returns {Promise<void>}
+   */
+  async setPractitionersForDay(dayOfWeek, practitionersArray) {
+    try {
+      const practitionersRef = ref(database, `${DB_PATH}/practitionersByDay/${dayOfWeek}`);
+      const practitionersObject = arrayToFirebaseObject(practitionersArray);
+      await set(practitionersRef, practitionersObject);
+    } catch (error) {
+      console.error(`Error setting practitioners for ${dayOfWeek} in Firebase:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Subscribe to practitioner changes for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Function} callback - Function to call when practitioners change
+   * @returns {Function} Unsubscribe function
+   */
+  subscribeToPractitionersForDay(dayOfWeek, callback) {
+    const practitionersRef = ref(database, `${DB_PATH}/practitionersByDay/${dayOfWeek}`);
+
+    const listener = onValue(practitionersRef, (snapshot) => {
+      const practitionersArray = firebaseObjectToArray(snapshot.val());
+      callback(practitionersArray);
+    }, (error) => {
+      console.error(`Error in practitioners subscription for ${dayOfWeek}:`, error);
+    });
+
+    this.listeners.set(`practitioners-${dayOfWeek}`, { ref: practitionersRef, listener });
+
+    return () => {
+      off(practitionersRef);
+      this.listeners.delete(`practitioners-${dayOfWeek}`);
+    };
+  }
+
   // ==================== SETTINGS OPERATIONS ====================
 
   /**
@@ -275,6 +393,36 @@ class FirebaseService {
       off(settingsRef);
       this.listeners.delete('settings');
     };
+  }
+
+  /**
+   * Get selected day from Firebase
+   * @returns {Promise<string>} Selected day name (e.g., 'monday')
+   */
+  async getSelectedDay() {
+    try {
+      const dayRef = ref(database, `${DB_PATH}/settings/selectedDay`);
+      const snapshot = await get(dayRef);
+      return snapshot.val() || null;
+    } catch (error) {
+      console.error('Error getting selected day from Firebase:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set selected day in Firebase
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<void>}
+   */
+  async setSelectedDay(dayOfWeek) {
+    try {
+      const dayRef = ref(database, `${DB_PATH}/settings/selectedDay`);
+      await set(dayRef, dayOfWeek);
+    } catch (error) {
+      console.error('Error setting selected day in Firebase:', error);
+      throw error;
+    }
   }
 
   // ==================== UTILITY OPERATIONS ====================
