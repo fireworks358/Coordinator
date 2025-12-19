@@ -7,7 +7,7 @@ import { getCurrentDayOfWeek, getAllDays } from '../utils/dateUtils.js';
 
 // ===== FIREBASE TOGGLE =====
 // Set to false to use localStorage only (no Firebase)
-const USE_FIREBASE = false; // Change to true to re-enable Firebase
+const USE_FIREBASE = true; // Change to true to re-enable Firebase
 // ===========================
 
 /**
