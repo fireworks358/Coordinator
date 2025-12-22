@@ -253,17 +253,28 @@ class StorageService {
    * @returns {Promise<Array>} Array of theatre objects
    */
   async getTheatresForDay(dayOfWeek) {
+    // Try Firebase first if available
     if (this.isFirebaseAvailable()) {
       try {
-        return await firebaseService.getTheatresForDay(dayOfWeek);
+        const firebaseData = await firebaseService.getTheatresForDay(dayOfWeek);
+        console.log(`[StorageService] Loaded ${firebaseData?.length || 0} theatres for ${dayOfWeek} from Firebase`);
+
+        // Always trust Firebase as source of truth when it's available
+        // Also sync this data to localStorage for offline access
+        if (firebaseData) {
+          const data = this.loadFromLocalStorage('theatresByDay', {});
+          data[dayOfWeek] = firebaseData;
+          this.saveToLocalStorage('theatresByDay', data);
+          return firebaseData;
+        }
       } catch (error) {
         console.error(`Error getting theatres for ${dayOfWeek} from Firebase:`, error);
       }
     }
 
-    // Fallback to localStorage
+    // Only fallback to localStorage if Firebase is NOT available (disconnected)
     const data = this.loadFromLocalStorage('theatresByDay', {});
-    console.log(`[StorageService] Loading theatres for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'theatres');
+    console.log(`[StorageService] Firebase unavailable - loading theatres for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'theatres');
     return data[dayOfWeek] || [];
   }
 
@@ -323,17 +334,28 @@ class StorageService {
    * @returns {Promise<Array>} Array of practitioner objects
    */
   async getPractitionersForDay(dayOfWeek) {
+    // Try Firebase first if available
     if (this.isFirebaseAvailable()) {
       try {
-        return await firebaseService.getPractitionersForDay(dayOfWeek);
+        const firebaseData = await firebaseService.getPractitionersForDay(dayOfWeek);
+        console.log(`[StorageService] Loaded ${firebaseData?.length || 0} practitioners for ${dayOfWeek} from Firebase`);
+
+        // Always trust Firebase as source of truth when it's available
+        // Also sync this data to localStorage for offline access
+        if (firebaseData) {
+          const data = this.loadFromLocalStorage('practitionersByDay', {});
+          data[dayOfWeek] = firebaseData;
+          this.saveToLocalStorage('practitionersByDay', data);
+          return firebaseData;
+        }
       } catch (error) {
         console.error(`Error getting practitioners for ${dayOfWeek} from Firebase:`, error);
       }
     }
 
-    // Fallback to localStorage
+    // Only fallback to localStorage if Firebase is NOT available (disconnected)
     const data = this.loadFromLocalStorage('practitionersByDay', {});
-    console.log(`[StorageService] Loading practitioners for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'practitioners');
+    console.log(`[StorageService] Firebase unavailable - loading practitioners for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'practitioners');
     return data[dayOfWeek] || [];
   }
 
@@ -386,17 +408,26 @@ class StorageService {
    * @returns {Promise<string|null>} Roster date string or null
    */
   async getRosterDateForDay(dayOfWeek) {
+    // Try Firebase first if available
     if (this.isFirebaseAvailable()) {
       try {
-        return await firebaseService.getRosterDateForDay(dayOfWeek);
+        const firebaseData = await firebaseService.getRosterDateForDay(dayOfWeek);
+        console.log(`[StorageService] Loaded roster date for ${dayOfWeek} from Firebase:`, firebaseData || 'null');
+
+        // Always trust Firebase as source of truth when it's available
+        // Also sync this data to localStorage for offline access
+        const data = this.loadFromLocalStorage('rosterDatesByDay', {});
+        data[dayOfWeek] = firebaseData || null;
+        this.saveToLocalStorage('rosterDatesByDay', data);
+        return firebaseData || null;
       } catch (error) {
         console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
       }
     }
 
-    // Fallback to localStorage
+    // Only fallback to localStorage if Firebase is NOT available (disconnected)
     const data = this.loadFromLocalStorage('rosterDatesByDay', {});
-    console.log(`[StorageService] Loading roster date for ${dayOfWeek} from localStorage:`, data[dayOfWeek]);
+    console.log(`[StorageService] Firebase unavailable - loading roster date for ${dayOfWeek} from localStorage:`, data[dayOfWeek]);
     return data[dayOfWeek] || null;
   }
 
@@ -595,6 +626,56 @@ class StorageService {
   }
 
   // ==================== UTILITY OPERATIONS ====================
+
+  /**
+   * Export data for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<Object>} Object with data for the specified day
+   */
+  async exportDayData(dayOfWeek) {
+    if (this.isFirebaseAvailable()) {
+      try {
+        const theatres = await firebaseService.getTheatresForDay(dayOfWeek);
+        const practitioners = await firebaseService.getPractitionersForDay(dayOfWeek);
+        const rosterDate = await firebaseService.getRosterDateForDay(dayOfWeek);
+
+        return {
+          day: dayOfWeek,
+          theatres,
+          practitioners,
+          rosterDate,
+          theme: this.loadFromLocalStorage('theme', 'dark'),
+          highlightSettings: this.loadFromLocalStorage('highlightSettings', {
+            highlightEarlies: true,
+            highlight1730s: true,
+            highlight1830s: true,
+            highlightLates: true
+          })
+        };
+      } catch (error) {
+        console.error(`Error exporting ${dayOfWeek} data from Firebase, using localStorage:`, error);
+      }
+    }
+
+    // Fallback to localStorage
+    const theatresByDay = this.loadFromLocalStorage('theatresByDay', {});
+    const practitionersByDay = this.loadFromLocalStorage('practitionersByDay', {});
+    const rosterDatesByDay = this.loadFromLocalStorage('rosterDatesByDay', {});
+
+    return {
+      day: dayOfWeek,
+      theatres: theatresByDay[dayOfWeek] || [],
+      practitioners: practitionersByDay[dayOfWeek] || [],
+      rosterDate: rosterDatesByDay[dayOfWeek] || null,
+      theme: this.loadFromLocalStorage('theme', 'dark'),
+      highlightSettings: this.loadFromLocalStorage('highlightSettings', {
+        highlightEarlies: true,
+        highlight1730s: true,
+        highlight1830s: true,
+        highlightLates: true
+      })
+    };
+  }
 
   /**
    * Export all data
