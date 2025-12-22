@@ -32,7 +32,7 @@ const getNextStatus = (currentStatus) => {
     }
 };
 
-const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings, onPractitionerDrop, lunchStatus }) => {
+const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPractitioner, phoneExtension, status, handleTileClick, handleStatusToggle, highlightSettings, onPractitionerDrop, lunchStatus, isPractitionerSick }) => {
 
     // Drag-over state for drop target visual feedback
     const [isDragOver, setIsDragOver] = useState(false);
@@ -134,7 +134,7 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
 
     return (
         <div
-            className={`theatre-tile ${tileStatusClass} ${isDragOver ? 'drag-over' : ''} ${lunchHighlightClass()}`}
+            className={`theatre-tile ${tileStatusClass} ${isDragOver ? 'drag-over' : ''} ${lunchHighlightClass()} ${isPractitionerSick ? 'sick-practitioner-allocated' : ''}`}
             onClick={() => handleTileClick(name)}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -149,7 +149,7 @@ const TheatreTile = ({ name, currentOdp, theatreEta, practitionerEndTime, nextPr
                 {currentOdp ? (
                     <>
                         <p
-                            className={`practitioner-info ${getPractitionerTimeClass(practitionerEndTime)}`}
+                            className={`practitioner-info ${getPractitionerTimeClass(practitionerEndTime)} ${isPractitionerSick ? 'sick-practitioner-name' : ''}`}
                             draggable={currentOdp ? true : false}
                             onDragStart={handleOdpDragStart}
                             style={{ cursor: currentOdp ? 'move' : 'default' }}

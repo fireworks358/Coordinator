@@ -5,37 +5,55 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import storageService from '../services/storageService.js';
 
 const defaultPractitioners = [
-    { name: 'M Varghese', endTime: '17:30', relieved: false, supper: false },
-    { name: 'K Bevis', endTime: '18:00', relieved: false, supper: false },
+    { name: 'M Varghese', endTime: '17:30', relieved: false, supper: false, sick: false },
+    { name: 'K Bevis', endTime: '18:00', relieved: false, supper: false, sick: false },
 ];
 
 /**
  * Custom hook for managing practitioner data with Firebase real-time sync
+ * @param {string} selectedDay - Day of week (e.g., 'monday')
  * @returns {Object} { practitionerList, setPractitionerList, updatePractitioner, isLoading }
  */
-export const usePractitionerData = () => {
+export const usePractitionerData = (selectedDay) => {
   const [practitionerList, setPractitionerList] = useState(defaultPractitioners);
   const [isLoading, setIsLoading] = useState(true);
   const isFirebaseUpdate = useRef(false);
   const unsubscribeRef = useRef(null);
+  const previousDayRef = useRef(selectedDay);
 
   // Load initial data and subscribe to updates
   useEffect(() => {
     let mounted = true;
 
+    // Reset loading state when day changes
+    setIsLoading(true);
+
+    console.log(`[usePractitionerData] Effect running for day: ${selectedDay}`);
+
     const initializePractitioners = async () => {
       try {
-        // Load initial data from storage
-        const initialData = await storageService.getPractitioners();
-        if (mounted && initialData.length > 0) {
-          // Ensure all practitioners have relieved and supper properties
-          const migratedData = initialData.map(p => ({
-            ...p,
-            relieved: p.relieved ?? false,
-            supper: p.supper ?? false
-          }));
-          isFirebaseUpdate.current = true;
-          setPractitionerList(migratedData);
+        // Load initial data from storage for selected day
+        const initialData = await storageService.getPractitionersForDay(selectedDay);
+        console.log(`[usePractitionerData] Loaded ${initialData.length} practitioners for ${selectedDay}`);
+
+        if (mounted) {
+          if (initialData.length > 0) {
+            // Ensure all practitioners have relieved, supper, and sick properties
+            const migratedData = initialData.map(p => ({
+              ...p,
+              relieved: p.relieved ?? false,
+              supper: p.supper ?? false,
+              sick: p.sick ?? false
+            }));
+            isFirebaseUpdate.current = true;
+            console.log(`[usePractitionerData] Setting ${migratedData.length} practitioners for ${selectedDay}`);
+            setPractitionerList(migratedData);
+          } else {
+            // Use empty list if no data for this day
+            isFirebaseUpdate.current = true;
+            console.log(`[usePractitionerData] No data for ${selectedDay}, using empty list`);
+            setPractitionerList([]);
+          }
         }
       } catch (error) {
         console.error('Error loading initial practitioner data:', error);
@@ -45,16 +63,17 @@ export const usePractitionerData = () => {
         }
       }
 
-      // Subscribe to real-time updates
+      // Subscribe to real-time updates for selected day
       // Always subscribe - Firebase listeners work even when not connected yet
       try {
-        unsubscribeRef.current = storageService.subscribeToPractitioners((updatedPractitioners) => {
+        unsubscribeRef.current = storageService.subscribeToPractitionersForDay(selectedDay, (updatedPractitioners) => {
           if (mounted && updatedPractitioners.length > 0) {
-            // Ensure all practitioners have relieved and supper properties
+            // Ensure all practitioners have relieved, supper, and sick properties
             const migratedData = updatedPractitioners.map(p => ({
               ...p,
               relieved: p.relieved ?? false,
-              supper: p.supper ?? false
+              supper: p.supper ?? false,
+              sick: p.sick ?? false
             }));
             isFirebaseUpdate.current = true;
             setPractitionerList(migratedData);
@@ -74,22 +93,33 @@ export const usePractitionerData = () => {
         unsubscribeRef.current();
       }
     };
-  }, []);
+  }, [selectedDay]); // Re-run when selected day changes
 
   // Save practitioners when they change (but not on Firebase updates to prevent loops)
   useEffect(() => {
     if (isFirebaseUpdate.current) {
+      console.log(`[usePractitionerData] Skipping save - Firebase update flag set`);
       isFirebaseUpdate.current = false;
+      return;
+    }
+
+    // Check if day changed - if so, don't save (we're loading new day's data)
+    if (previousDayRef.current !== selectedDay) {
+      console.log(`[usePractitionerData] Day changed from ${previousDayRef.current} to ${selectedDay} - skipping save`);
+      previousDayRef.current = selectedDay;
       return;
     }
 
     // Only save if not a Firebase update (user-initiated change)
     if (!isLoading) {
-      storageService.setPractitioners(practitionerList).catch(error => {
+      console.log(`[usePractitionerData] Saving ${practitionerList.length} practitioners to ${selectedDay}`);
+      storageService.setPractitionersForDay(selectedDay, practitionerList).catch(error => {
         console.error('Error saving practitioners:', error);
       });
+    } else {
+      console.log(`[usePractitionerData] Skipping save - still loading`);
     }
-  }, [practitionerList, isLoading]);
+  }, [practitionerList, selectedDay, isLoading]); // Re-save when day or practitioners change
 
   /**
    * Update a single practitioner field

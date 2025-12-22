@@ -3,11 +3,12 @@
 
 import firebaseService from './firebaseService.js';
 import { safeStringify, safeParse } from './dataTransformers.js';
+import { getCurrentDayOfWeek, getAllDays } from '../utils/dateUtils.js';
 
 // ===== FIREBASE TOGGLE =====
 // Set to false to use localStorage only (no Firebase)
 const USE_FIREBASE = true; // Change to true to re-enable Firebase
-// ===========================
+// ==========================
 
 /**
  * Storage Service Class
@@ -16,6 +17,10 @@ const USE_FIREBASE = true; // Change to true to re-enable Firebase
 class StorageService {
   constructor() {
     this.mode = USE_FIREBASE ? 'firebase' : 'localStorage';
+
+    // Run migration before anything else
+    this.migrateToWeeklyStructure();
+
     if (USE_FIREBASE) {
       this.initializeConnectionMonitoring();
     } else {
@@ -236,6 +241,174 @@ class StorageService {
     return firebaseService.subscribeToPractitioners(callback);
   }
 
+  // ==================== DAY-BASED THEATRE OPERATIONS ====================
+
+  /**
+   * Get theatres for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<Array>} Array of theatre objects
+   */
+  async getTheatresForDay(dayOfWeek) {
+    if (this.isFirebaseAvailable()) {
+      try {
+        return await firebaseService.getTheatresForDay(dayOfWeek);
+      } catch (error) {
+        console.error(`Error getting theatres for ${dayOfWeek} from Firebase:`, error);
+      }
+    }
+
+    // Fallback to localStorage
+    const data = this.loadFromLocalStorage('theatresByDay', {});
+    console.log(`[StorageService] Loading theatres for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'theatres');
+    return data[dayOfWeek] || [];
+  }
+
+  /**
+   * Set theatres for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Array} theatresArray - Array of theatre objects
+   * @returns {Promise<void>}
+   */
+  async setTheatresForDay(dayOfWeek, theatresArray) {
+    console.log(`[StorageService] Saving ${theatresArray.length} theatres to ${dayOfWeek} in localStorage`);
+
+    // Save to localStorage
+    const allData = this.loadFromLocalStorage('theatresByDay', {});
+    allData[dayOfWeek] = theatresArray;
+    this.saveToLocalStorage('theatresByDay', allData);
+
+    // Save to Firebase if available
+    if (this.isFirebaseAvailable()) {
+      try {
+        await firebaseService.setTheatresForDay(dayOfWeek, theatresArray);
+      } catch (error) {
+        console.error(`Error saving theatres for ${dayOfWeek} to Firebase:`, error);
+      }
+    }
+  }
+
+  /**
+   * Subscribe to theatre changes for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Function} callback - Function to call when theatres change
+   * @returns {Function} Unsubscribe function
+   */
+  subscribeToTheatresForDay(dayOfWeek, callback) {
+    if (this.isFirebaseAvailable()) {
+      return firebaseService.subscribeToTheatresForDay(dayOfWeek, callback);
+    }
+    // Return no-op unsubscribe function when Firebase is disabled
+    console.log(`[StorageService] Firebase disabled - no subscription for theatres on ${dayOfWeek}`);
+    return () => {};
+  }
+
+  // ==================== DAY-BASED PRACTITIONER OPERATIONS ====================
+
+  /**
+   * Get practitioners for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<Array>} Array of practitioner objects
+   */
+  async getPractitionersForDay(dayOfWeek) {
+    if (this.isFirebaseAvailable()) {
+      try {
+        return await firebaseService.getPractitionersForDay(dayOfWeek);
+      } catch (error) {
+        console.error(`Error getting practitioners for ${dayOfWeek} from Firebase:`, error);
+      }
+    }
+
+    // Fallback to localStorage
+    const data = this.loadFromLocalStorage('practitionersByDay', {});
+    console.log(`[StorageService] Loading practitioners for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'practitioners');
+    return data[dayOfWeek] || [];
+  }
+
+  /**
+   * Set practitioners for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Array} practitionersArray - Array of practitioner objects
+   * @returns {Promise<void>}
+   */
+  async setPractitionersForDay(dayOfWeek, practitionersArray) {
+    console.log(`[StorageService] Saving ${practitionersArray.length} practitioners to ${dayOfWeek} in localStorage`);
+
+    // Save to localStorage
+    const allData = this.loadFromLocalStorage('practitionersByDay', {});
+    allData[dayOfWeek] = practitionersArray;
+    this.saveToLocalStorage('practitionersByDay', allData);
+
+    // Save to Firebase if available
+    if (this.isFirebaseAvailable()) {
+      try {
+        await firebaseService.setPractitionersForDay(dayOfWeek, practitionersArray);
+      } catch (error) {
+        console.error(`Error saving practitioners for ${dayOfWeek} to Firebase:`, error);
+      }
+    }
+  }
+
+  /**
+   * Subscribe to practitioner changes for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {Function} callback - Function to call when practitioners change
+   * @returns {Function} Unsubscribe function
+   */
+  subscribeToPractitionersForDay(dayOfWeek, callback) {
+    if (this.isFirebaseAvailable()) {
+      return firebaseService.subscribeToPractitionersForDay(dayOfWeek, callback);
+    }
+    // Return no-op unsubscribe function when Firebase is disabled
+    console.log(`[StorageService] Firebase disabled - no subscription for practitioners on ${dayOfWeek}`);
+    return () => {};
+  }
+
+  // ==================== ROSTER DATE OPERATIONS ====================
+
+  /**
+   * Get roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<string|null>} Roster date string or null
+   */
+  async getRosterDateForDay(dayOfWeek) {
+    if (this.isFirebaseAvailable()) {
+      try {
+        return await firebaseService.getRosterDateForDay(dayOfWeek);
+      } catch (error) {
+        console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
+      }
+    }
+
+    // Fallback to localStorage
+    const data = this.loadFromLocalStorage('rosterDatesByDay', {});
+    console.log(`[StorageService] Loading roster date for ${dayOfWeek} from localStorage:`, data[dayOfWeek]);
+    return data[dayOfWeek] || null;
+  }
+
+  /**
+   * Set roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {string} rosterDate - Roster date string
+   * @returns {Promise<void>}
+   */
+  async setRosterDateForDay(dayOfWeek, rosterDate) {
+    console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate);
+
+    // Save to localStorage
+    const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
+    allData[dayOfWeek] = rosterDate;
+    this.saveToLocalStorage('rosterDatesByDay', allData);
+
+    // Save to Firebase if available
+    if (this.isFirebaseAvailable()) {
+      try {
+        await firebaseService.setRosterDateForDay(dayOfWeek, rosterDate);
+      } catch (error) {
+        console.error(`Error saving roster date for ${dayOfWeek} to Firebase:`, error);
+      }
+    }
+  }
+
   // ==================== SETTINGS OPERATIONS ====================
 
   /**
@@ -326,6 +499,86 @@ class StorageService {
     return firebaseService.subscribeToSettings(callback);
   }
 
+  /**
+   * Get selected day
+   * @returns {Promise<string>} Selected day name (e.g., 'monday')
+   */
+  async getSelectedDay() {
+    if (this.isFirebaseAvailable()) {
+      try {
+        const day = await firebaseService.getSelectedDay();
+        if (day) return day;
+      } catch (error) {
+        console.error('Error getting selected day from Firebase:', error);
+      }
+    }
+
+    // Fallback to localStorage
+    return this.loadFromLocalStorage('selectedDay', null) || getCurrentDayOfWeek();
+  }
+
+  /**
+   * Set selected day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<void>}
+   */
+  async setSelectedDay(dayOfWeek) {
+    // Save to localStorage
+    this.saveToLocalStorage('selectedDay', dayOfWeek);
+
+    // Save to Firebase if available
+    if (this.isFirebaseAvailable()) {
+      try {
+        await firebaseService.setSelectedDay(dayOfWeek);
+      } catch (error) {
+        console.error('Error setting selected day in Firebase:', error);
+      }
+    }
+  }
+
+  // ==================== DATA MIGRATION ====================
+
+  /**
+   * Migrate legacy flat structure to day-based structure
+   * Called automatically on initialization
+   */
+  async migrateToWeeklyStructure() {
+    const oldTheatres = this.loadFromLocalStorage('theatreData', null);
+    const oldPractitioners = this.loadFromLocalStorage('practitionerListData', null);
+    const newExists = this.loadFromLocalStorage('theatresByDay', null);
+
+    // Only migrate if old data exists and new structure doesn't
+    if ((oldTheatres || oldPractitioners) && !newExists) {
+      console.log('Migrating to weekly structure...');
+
+      const today = getCurrentDayOfWeek();
+      const theatresByDay = {};
+      const practitionersByDay = {};
+
+      // Initialize all days
+      getAllDays().forEach(day => {
+        // Assign existing data to current day, empty arrays for others
+        theatresByDay[day] = day === today && oldTheatres ? oldTheatres : [];
+        practitionersByDay[day] = day === today && oldPractitioners ? oldPractitioners : [];
+      });
+
+      // Save new structure
+      this.saveToLocalStorage('theatresByDay', theatresByDay);
+      this.saveToLocalStorage('practitionersByDay', practitionersByDay);
+      this.saveToLocalStorage('selectedDay', today);
+
+      // Backup old data (keep for 7 days in case of rollback)
+      if (oldTheatres) {
+        this.saveToLocalStorage('theatreData_legacy', oldTheatres);
+      }
+      if (oldPractitioners) {
+        this.saveToLocalStorage('practitionerListData_legacy', oldPractitioners);
+      }
+
+      console.log(`Migration complete. Data assigned to ${today}.`);
+    }
+  }
+
   // ==================== UTILITY OPERATIONS ====================
 
   /**
@@ -341,7 +594,28 @@ class StorageService {
       }
     }
 
-    // Fallback to localStorage
+    // Fallback to localStorage - export day-based structure
+    const theatresByDay = this.loadFromLocalStorage('theatresByDay', null);
+    const practitionersByDay = this.loadFromLocalStorage('practitionersByDay', null);
+
+    // If new structure exists, export it
+    if (theatresByDay && practitionersByDay) {
+      return {
+        theatresByDay,
+        practitionersByDay,
+        rosterDatesByDay: this.loadFromLocalStorage('rosterDatesByDay', {}),
+        theme: this.loadFromLocalStorage('theme', 'dark'),
+        highlightSettings: this.loadFromLocalStorage('highlightSettings', {
+          highlightEarlies: true,
+          highlight1730s: true,
+          highlight1830s: true,
+          highlightLates: true
+        }),
+        selectedDay: this.loadFromLocalStorage('selectedDay', getCurrentDayOfWeek())
+      };
+    }
+
+    // Fallback to legacy format if day-based doesn't exist
     return {
       theatres: this.loadFromLocalStorage('theatreData', []),
       practitionerList: this.loadFromLocalStorage('practitionerListData', []),
@@ -357,17 +631,38 @@ class StorageService {
 
   /**
    * Import all data
-   * @param {Object} data - Data object with theatres and practitionerList
+   * @param {Object} data - Data object with theatres and practitionerList (legacy or day-based)
    * @returns {Promise<void>}
    */
   async importAllData(data) {
-    // Save to localStorage
-    if (data.theatres) {
-      this.saveToLocalStorage('theatreData', data.theatres);
+    // Handle new day-based format
+    if (data.theatresByDay && data.practitionersByDay) {
+      this.saveToLocalStorage('theatresByDay', data.theatresByDay);
+      this.saveToLocalStorage('practitionersByDay', data.practitionersByDay);
+      if (data.rosterDatesByDay) {
+        this.saveToLocalStorage('rosterDatesByDay', data.rosterDatesByDay);
+      }
+      if (data.selectedDay) {
+        this.saveToLocalStorage('selectedDay', data.selectedDay);
+      }
     }
-    if (data.practitionerList) {
-      this.saveToLocalStorage('practitionerListData', data.practitionerList);
+    // Handle legacy format - convert to day-based
+    else if (data.theatres && data.practitionerList) {
+      const today = getCurrentDayOfWeek();
+      const theatresByDay = {};
+      const practitionersByDay = {};
+
+      getAllDays().forEach(day => {
+        theatresByDay[day] = day === today ? data.theatres : [];
+        practitionersByDay[day] = day === today ? data.practitionerList : [];
+      });
+
+      this.saveToLocalStorage('theatresByDay', theatresByDay);
+      this.saveToLocalStorage('practitionersByDay', practitionersByDay);
+      this.saveToLocalStorage('selectedDay', today);
     }
+
+    // Save other settings
     if (data.theme) {
       this.saveToLocalStorage('theme', data.theme);
     }

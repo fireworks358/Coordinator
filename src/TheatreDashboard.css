@@ -123,6 +123,69 @@ body.light-theme {
     align-items: center;
 }
 
+/* Data Controls Dropdown */
+.data-controls-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.data-controls-btn {
+    padding: 6px 12px;
+    background: #4b7f7e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    min-width: 140px;
+}
+
+.data-controls-btn:hover {
+    background: #3d6564;
+}
+
+.data-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 5px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 4px 12px var(--shadow-modal);
+    z-index: 1000;
+    min-width: 200px;
+    padding: 5px 0;
+}
+
+.dropdown-item-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.dropdown-item-btn:hover {
+    background: var(--bg-button);
+}
+
+.dropdown-item-btn.danger {
+    color: #ff6b6b;
+}
+
+.dropdown-item-btn.danger:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
 /* Hidden file inputs */
 .csv-upload-container input[type="file"],
 .upload-data-container input[type="file"] {
@@ -133,7 +196,27 @@ body.light-theme {
     height: 0.1px;
 }
 
-/* Upload/Download button base styles */
+/* Upload labels in dropdown */
+.upload-label-dropdown,
+.upload-data-label-dropdown {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85em;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+    text-align: left;
+}
+
+.upload-label-dropdown:hover,
+.upload-data-label-dropdown:hover {
+    background-color: var(--bg-button);
+}
+
+/* Legacy styles - kept for compatibility */
 .upload-label,
 .upload-data-label,
 .download-data-btn {
@@ -553,4 +636,72 @@ body.light-theme {
 
 .highlight-option:last-child {
     margin-bottom: 0;
+}
+
+/* ==================== DAY SELECTOR DROPDOWN STYLES ==================== */
+
+.day-selector-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.day-selector-btn {
+    padding: 10px 20px;
+    background: #4b7f7e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    min-width: 120px;
+}
+
+.day-selector-btn:hover {
+    background: #3d6564;
+}
+
+.day-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    min-width: 120px;
+}
+
+.day-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.day-dropdown-item:hover {
+    background: #3a3a3a;
+}
+
+.day-dropdown-item.active {
+    background: #4b7f7e;
+    color: white;
+    font-weight: 500;
+}
+
+.day-dropdown-item:first-child {
+    border-radius: 3px 3px 0 0;
+}
+
+.day-dropdown-item:last-child {
+    border-radius: 0 0 3px 3px;
 }

@@ -95,8 +95,30 @@ body {
     50% {
         box-shadow: 0 0 0 5px #ff9800, 0 4px 10px var(--shadow-tile);
     }
-} 
+}
 
+/* --- Sick Practitioner Highlights --- */
+.theatre-tile.sick-practitioner-allocated {
+    box-shadow: 0 0 0 3px #f44336, 0 4px 10px var(--shadow-tile);
+    animation: pulse-red 2s ease-in-out infinite;
+}
+
+.theatre-tile.sick-practitioner-allocated:hover {
+    box-shadow: 0 0 0 3px #f44336, 0 8px 15px var(--shadow-tile-hover);
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        box-shadow: 0 0 0 3px #f44336, 0 4px 10px var(--shadow-tile);
+    }
+    50% {
+        box-shadow: 0 0 0 6px #f44336, 0 4px 10px var(--shadow-tile);
+    }
+}
+
+.sick-practitioner-name {
+    color: #f44336 !important;
+}
 
 /* --- Header and Content Details --- */
 .header {
