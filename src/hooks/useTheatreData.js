@@ -63,7 +63,7 @@ export const useTheatreData = (selectedDay) => {
     // Reset loading state when day changes
     setIsLoading(true);
 
-    console.log(`[useTheatreData] Effect running for day: ${selectedDay}`);
+    console.log(`[useTheatreData] ===== INITIALIZING FOR DAY: ${selectedDay} =====`);
 
     const initializeTheatres = async () => {
       try {

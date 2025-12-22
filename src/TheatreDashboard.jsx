@@ -129,20 +129,35 @@ const TheatreDashboard = () => {
     // --- DATA EXPORT/IMPORT LOGIC ---
     const handleDownload = async () => {
         try {
-            const dashboardData = await storageService.exportAllData();
+            // Export only the currently viewed day
+            const currentDayTheatres = await storageService.getTheatresForDay(selectedDay);
+            const currentDayPractitioners = await storageService.getPractitionersForDay(selectedDay);
+            const currentDayRosterDate = await storageService.getRosterDateForDay(selectedDay);
+            const currentTheme = await storageService.getTheme();
+            const currentHighlightSettings = await storageService.getHighlightSettings();
+
+            const dashboardData = {
+                selectedDay: selectedDay,
+                theatres: currentDayTheatres,
+                practitioners: currentDayPractitioners,
+                rosterDate: currentDayRosterDate,
+                theme: currentTheme,
+                highlightSettings: currentHighlightSettings
+            };
+
             const jsonString = JSON.stringify(dashboardData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
             const a = document.createElement('a');
             a.href = url;
-            const filename = `theatre_dashboard_backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.json`;
+            const filename = `theatre_dashboard_${selectedDay}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.json`;
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            alert("Dashboard data downloaded successfully! Filename: " + filename);
+            alert(`Dashboard data for ${selectedDay} downloaded successfully! Filename: ${filename}`);
         } catch (error) {
             console.error("Error exporting data:", error);
             alert("Error downloading data. Please try again.");
@@ -159,7 +174,45 @@ const TheatreDashboard = () => {
                 const jsonText = e.target.result;
                 const uploadedData = JSON.parse(jsonText);
 
-                if (uploadedData.theatres && uploadedData.practitionerList) {
+                // Handle new single-day format
+                if (uploadedData.theatres && uploadedData.practitioners && uploadedData.selectedDay) {
+                    // Ensure imported theatres have order field and are sorted
+                    const theatresWithOrder = uploadedData.theatres.map((t, index) => ({
+                        ...t,
+                        order: t.order !== undefined ? t.order : index
+                    })).sort((a, b) => a.order - b.order);
+
+                    const dayToImport = uploadedData.selectedDay;
+
+                    // Import to the specific day
+                    await storageService.setTheatresForDay(dayToImport, theatresWithOrder);
+                    await storageService.setPractitionersForDay(dayToImport, uploadedData.practitioners);
+
+                    if (uploadedData.rosterDate) {
+                        await storageService.setRosterDateForDay(dayToImport, uploadedData.rosterDate);
+                    }
+
+                    // Import settings if provided
+                    if (uploadedData.theme) {
+                        await storageService.setTheme(uploadedData.theme);
+                    }
+                    if (uploadedData.highlightSettings) {
+                        await storageService.setHighlightSettings(uploadedData.highlightSettings);
+                    }
+
+                    // If importing to the current day, update local state
+                    if (dayToImport === selectedDay) {
+                        setTheatres(theatresWithOrder);
+                        setPractitionerList(uploadedData.practitioners);
+                        if (uploadedData.rosterDate) {
+                            setRosterDate(uploadedData.rosterDate);
+                        }
+                    }
+
+                    alert(`Successfully loaded ${theatresWithOrder.length} theatres and ${uploadedData.practitioners.length} staff for ${dayToImport}.`);
+                }
+                // Handle legacy format (old backup files with all days)
+                else if (uploadedData.theatres && uploadedData.practitionerList) {
                     // Ensure imported theatres have order field and are sorted
                     const theatresWithOrder = uploadedData.theatres.map((t, index) => ({
                         ...t,
@@ -176,9 +229,9 @@ const TheatreDashboard = () => {
                     setTheatres(theatresWithOrder);
                     setPractitionerList(uploadedData.practitionerList);
 
-                    alert(`Successfully loaded ${theatresWithOrder.length} theatres and ${uploadedData.practitionerList.length} staff from backup file.`);
+                    alert(`Successfully loaded ${theatresWithOrder.length} theatres and ${uploadedData.practitionerList.length} staff from legacy backup file.`);
                 } else {
-                    alert("Backup file format invalid. Missing 'theatres' or 'practitionerList' keys.");
+                    alert("Backup file format invalid. Expected format with 'theatres' and 'practitioners' (or 'practitionerList' for legacy files).");
                 }
             } catch (error) {
                 console.error("Error reading or parsing backup file:", error);

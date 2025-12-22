@@ -230,9 +230,11 @@ class FirebaseService {
    */
   subscribeToTheatresForDay(dayOfWeek, callback) {
     const theatresRef = ref(database, `${DB_PATH}/theatresByDay/${dayOfWeek}`);
+    console.log(`[FirebaseService] Subscribing to theatres for ${dayOfWeek} at path: ${DB_PATH}/theatresByDay/${dayOfWeek}`);
 
     const listener = onValue(theatresRef, (snapshot) => {
       const theatresArray = firebaseObjectToArray(snapshot.val());
+      console.log(`[FirebaseService] Received update for ${dayOfWeek}: ${theatresArray.length} theatres`);
       callback(theatresArray);
     }, (error) => {
       console.error(`Error in theatres subscription for ${dayOfWeek}:`, error);
@@ -241,6 +243,7 @@ class FirebaseService {
     this.listeners.set(`theatres-${dayOfWeek}`, { ref: theatresRef, listener });
 
     return () => {
+      console.log(`[FirebaseService] Unsubscribing from theatres for ${dayOfWeek}`);
       off(theatresRef);
       this.listeners.delete(`theatres-${dayOfWeek}`);
     };

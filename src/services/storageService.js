@@ -32,14 +32,18 @@ class StorageService {
    * Monitor connection and switch modes automatically
    */
   initializeConnectionMonitoring() {
+    // Log initial connection status
+    const initialStatus = firebaseService.getConnectionStatus();
+    console.log(`[StorageService] Initial Firebase connection status: ${initialStatus}`);
+
     // Check connection status periodically
     setInterval(() => {
       const isConnected = firebaseService.getConnectionStatus();
       if (this.mode === 'firebase' && !isConnected) {
-        console.warn('Firebase disconnected. Switching to localStorage mode.');
+        console.warn('[StorageService] Firebase disconnected. Switching to localStorage mode.');
         this.mode = 'localStorage';
       } else if (this.mode === 'localStorage' && isConnected) {
-        console.log('Firebase reconnected. Switching back to Firebase mode.');
+        console.log('[StorageService] Firebase reconnected. Switching back to Firebase mode.');
         this.mode = 'firebase';
       }
     }, 5000); // Check every 5 seconds
@@ -278,12 +282,19 @@ class StorageService {
     this.saveToLocalStorage('theatresByDay', allData);
 
     // Save to Firebase if available
-    if (this.isFirebaseAvailable()) {
+    const firebaseAvailable = this.isFirebaseAvailable();
+    console.log(`[StorageService] Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+
+    if (firebaseAvailable) {
       try {
+        console.log(`[StorageService] Writing ${theatresArray.length} theatres to Firebase for ${dayOfWeek}`);
         await firebaseService.setTheatresForDay(dayOfWeek, theatresArray);
+        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
       } catch (error) {
         console.error(`Error saving theatres for ${dayOfWeek} to Firebase:`, error);
       }
+    } else {
+      console.warn(`[StorageService] Firebase NOT available - changes will not sync to ${dayOfWeek}`);
     }
   }
 
