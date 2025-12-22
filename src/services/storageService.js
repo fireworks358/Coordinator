@@ -305,11 +305,13 @@ class StorageService {
    * @returns {Function} Unsubscribe function
    */
   subscribeToTheatresForDay(dayOfWeek, callback) {
-    if (this.isFirebaseAvailable()) {
+    // Always subscribe if Firebase is enabled, even if not connected yet
+    // Firebase listeners will automatically sync when connection is established
+    if (USE_FIREBASE) {
       return firebaseService.subscribeToTheatresForDay(dayOfWeek, callback);
     }
-    // Return no-op unsubscribe function when Firebase is disabled
-    console.log(`[StorageService] Firebase disabled - no subscription for theatres on ${dayOfWeek}`);
+    // Return no-op unsubscribe function when Firebase is toggled off
+    console.log(`[StorageService] Firebase toggled off - no subscription for theatres on ${dayOfWeek}`);
     return () => {};
   }
 
@@ -366,11 +368,13 @@ class StorageService {
    * @returns {Function} Unsubscribe function
    */
   subscribeToPractitionersForDay(dayOfWeek, callback) {
-    if (this.isFirebaseAvailable()) {
+    // Always subscribe if Firebase is enabled, even if not connected yet
+    // Firebase listeners will automatically sync when connection is established
+    if (USE_FIREBASE) {
       return firebaseService.subscribeToPractitionersForDay(dayOfWeek, callback);
     }
-    // Return no-op unsubscribe function when Firebase is disabled
-    console.log(`[StorageService] Firebase disabled - no subscription for practitioners on ${dayOfWeek}`);
+    // Return no-op unsubscribe function when Firebase is toggled off
+    console.log(`[StorageService] Firebase toggled off - no subscription for practitioners on ${dayOfWeek}`);
     return () => {};
   }
 

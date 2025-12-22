@@ -15,6 +15,7 @@ class FirebaseService {
   constructor() {
     this.listeners = new Map();
     this.isConnected = false;
+    this.connectionCallbacks = new Set();
     this.initConnectionMonitor();
   }
 
@@ -24,8 +25,21 @@ class FirebaseService {
   initConnectionMonitor() {
     const connectedRef = ref(database, '.info/connected');
     onValue(connectedRef, (snapshot) => {
+      const wasConnected = this.isConnected;
       this.isConnected = snapshot.val() === true;
       console.log(`Firebase connection status: ${this.isConnected ? 'connected' : 'disconnected'}`);
+
+      // Notify callbacks when connection state changes from disconnected to connected
+      if (!wasConnected && this.isConnected) {
+        console.log('[FirebaseService] Connection established, notifying callbacks');
+        this.connectionCallbacks.forEach(callback => {
+          try {
+            callback(true);
+          } catch (error) {
+            console.error('Error in connection callback:', error);
+          }
+        });
+      }
     });
   }
 
@@ -35,6 +49,24 @@ class FirebaseService {
    */
   getConnectionStatus() {
     return this.isConnected;
+  }
+
+  /**
+   * Subscribe to connection state changes
+   * @param {Function} callback - Function to call when connected
+   * @returns {Function} Unsubscribe function
+   */
+  onConnectionChange(callback) {
+    this.connectionCallbacks.add(callback);
+
+    // If already connected, call immediately
+    if (this.isConnected) {
+      callback(true);
+    }
+
+    return () => {
+      this.connectionCallbacks.delete(callback);
+    };
   }
 
   // ==================== THEATRE OPERATIONS ====================
@@ -306,6 +338,40 @@ class FirebaseService {
       off(practitionersRef);
       this.listeners.delete(`practitioners-${dayOfWeek}`);
     };
+  }
+
+  // ==================== ROSTER DATE OPERATIONS ====================
+
+  /**
+   * Get roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @returns {Promise<string|null>} Roster date string or null
+   */
+  async getRosterDateForDay(dayOfWeek) {
+    try {
+      const rosterDateRef = ref(database, `${DB_PATH}/rosterDatesByDay/${dayOfWeek}`);
+      const snapshot = await get(rosterDateRef);
+      return snapshot.val() || null;
+    } catch (error) {
+      console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set roster date for a specific day
+   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * @param {string} rosterDate - Roster date string (e.g., '25/12/2024')
+   * @returns {Promise<void>}
+   */
+  async setRosterDateForDay(dayOfWeek, rosterDate) {
+    try {
+      const rosterDateRef = ref(database, `${DB_PATH}/rosterDatesByDay/${dayOfWeek}`);
+      await set(rosterDateRef, rosterDate);
+    } catch (error) {
+      console.error(`Error setting roster date for ${dayOfWeek} in Firebase:`, error);
+      throw error;
+    }
   }
 
   // ==================== SETTINGS OPERATIONS ====================
