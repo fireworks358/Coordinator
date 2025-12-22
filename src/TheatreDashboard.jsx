@@ -1216,6 +1216,11 @@ const TheatreDashboard = () => {
                 onRelief={handleDropRelief}
                 onCancel={handleDropCancel}
             />
+
+            {/* Version and Copyright Footer */}
+            <div className="version-footer">
+                v0.1.2 (alpha) | © T Simons 2025
+            </div>
         </div>
     );
 };

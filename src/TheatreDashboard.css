@@ -79,6 +79,10 @@ body.light-theme {
     display: flex;
     align-items: baseline;
     gap: 10px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: 10px;
 }
 
 .main-header h1 {
@@ -121,6 +125,7 @@ body.light-theme {
     display: flex;
     gap: 10px;
     align-items: center;
+    padding-top: 10px;
 }
 
 /* Data Controls Dropdown */
@@ -257,6 +262,7 @@ body.light-theme {
     display: flex;
     gap: 10px;
     align-items: center;
+    padding-top: 10px;
 }
 
 .theme-toggle-btn,
@@ -704,4 +710,18 @@ body.light-theme {
 
 .day-dropdown-item:last-child {
     border-radius: 0 0 3px 3px;
+}
+
+/* Version Footer */
+.version-footer {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9em;
+    color: var(--text-muted);
+    opacity: 0.6;
+    text-align: center;
+    pointer-events: none;
+    z-index: 500;
 }
