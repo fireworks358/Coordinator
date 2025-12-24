@@ -1219,7 +1219,7 @@ const TheatreDashboard = () => {
 
             {/* Version and Copyright Footer */}
             <div className="version-footer">
-                v0.1.2 (alpha) | © T Simons 2025
+                v0.1.3 (alpha) | © T Simons 2025
             </div>
         </div>
     );

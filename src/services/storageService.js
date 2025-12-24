@@ -285,27 +285,32 @@ class StorageService {
    * @returns {Promise<void>}
    */
   async setTheatresForDay(dayOfWeek, theatresArray) {
-    console.log(`[StorageService] Saving ${theatresArray.length} theatres to ${dayOfWeek} in localStorage`);
-
-    // Save to localStorage
-    const allData = this.loadFromLocalStorage('theatresByDay', {});
-    allData[dayOfWeek] = theatresArray;
-    this.saveToLocalStorage('theatresByDay', allData);
-
-    // Save to Firebase if available
     const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    console.log(`[StorageService] Saving ${theatresArray.length} theatres to ${dayOfWeek}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
 
+    // Save to Firebase FIRST if available (Firebase is source of truth)
     if (firebaseAvailable) {
       try {
         console.log(`[StorageService] Writing ${theatresArray.length} theatres to Firebase for ${dayOfWeek}`);
         await firebaseService.setTheatresForDay(dayOfWeek, theatresArray);
         console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
+
+        // Only update localStorage AFTER Firebase write succeeds
+        const allData = this.loadFromLocalStorage('theatresByDay', {});
+        allData[dayOfWeek] = theatresArray;
+        this.saveToLocalStorage('theatresByDay', allData);
+        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
       } catch (error) {
         console.error(`Error saving theatres for ${dayOfWeek} to Firebase:`, error);
+        // Don't update localStorage if Firebase write failed to avoid data inconsistency
+        throw error;
       }
     } else {
-      console.warn(`[StorageService] Firebase NOT available - changes will not sync to ${dayOfWeek}`);
+      // Firebase not available - save to localStorage only (offline mode)
+      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
+      const allData = this.loadFromLocalStorage('theatresByDay', {});
+      allData[dayOfWeek] = theatresArray;
+      this.saveToLocalStorage('theatresByDay', allData);
     }
   }
 
@@ -366,20 +371,32 @@ class StorageService {
    * @returns {Promise<void>}
    */
   async setPractitionersForDay(dayOfWeek, practitionersArray) {
-    console.log(`[StorageService] Saving ${practitionersArray.length} practitioners to ${dayOfWeek} in localStorage`);
+    const firebaseAvailable = this.isFirebaseAvailable();
+    console.log(`[StorageService] Saving ${practitionersArray.length} practitioners to ${dayOfWeek}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
 
-    // Save to localStorage
-    const allData = this.loadFromLocalStorage('practitionersByDay', {});
-    allData[dayOfWeek] = practitionersArray;
-    this.saveToLocalStorage('practitionersByDay', allData);
-
-    // Save to Firebase if available
-    if (this.isFirebaseAvailable()) {
+    // Save to Firebase FIRST if available (Firebase is source of truth)
+    if (firebaseAvailable) {
       try {
+        console.log(`[StorageService] Writing ${practitionersArray.length} practitioners to Firebase for ${dayOfWeek}`);
         await firebaseService.setPractitionersForDay(dayOfWeek, practitionersArray);
+        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
+
+        // Only update localStorage AFTER Firebase write succeeds
+        const allData = this.loadFromLocalStorage('practitionersByDay', {});
+        allData[dayOfWeek] = practitionersArray;
+        this.saveToLocalStorage('practitionersByDay', allData);
+        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
       } catch (error) {
         console.error(`Error saving practitioners for ${dayOfWeek} to Firebase:`, error);
+        // Don't update localStorage if Firebase write failed to avoid data inconsistency
+        throw error;
       }
+    } else {
+      // Firebase not available - save to localStorage only (offline mode)
+      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
+      const allData = this.loadFromLocalStorage('practitionersByDay', {});
+      allData[dayOfWeek] = practitionersArray;
+      this.saveToLocalStorage('practitionersByDay', allData);
     }
   }
 
@@ -438,20 +455,32 @@ class StorageService {
    * @returns {Promise<void>}
    */
   async setRosterDateForDay(dayOfWeek, rosterDate) {
-    console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate);
+    const firebaseAvailable = this.isFirebaseAvailable();
+    console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate, `Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
 
-    // Save to localStorage
-    const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
-    allData[dayOfWeek] = rosterDate;
-    this.saveToLocalStorage('rosterDatesByDay', allData);
-
-    // Save to Firebase if available
-    if (this.isFirebaseAvailable()) {
+    // Save to Firebase FIRST if available (Firebase is source of truth)
+    if (firebaseAvailable) {
       try {
+        console.log(`[StorageService] Writing roster date to Firebase for ${dayOfWeek}`);
         await firebaseService.setRosterDateForDay(dayOfWeek, rosterDate);
+        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
+
+        // Only update localStorage AFTER Firebase write succeeds
+        const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
+        allData[dayOfWeek] = rosterDate;
+        this.saveToLocalStorage('rosterDatesByDay', allData);
+        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
       } catch (error) {
         console.error(`Error saving roster date for ${dayOfWeek} to Firebase:`, error);
+        // Don't update localStorage if Firebase write failed to avoid data inconsistency
+        throw error;
       }
+    } else {
+      // Firebase not available - save to localStorage only (offline mode)
+      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
+      const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
+      allData[dayOfWeek] = rosterDate;
+      this.saveToLocalStorage('rosterDatesByDay', allData);
     }
   }
 
@@ -480,16 +509,28 @@ class StorageService {
    * @returns {Promise<void>}
    */
   async setTheme(theme) {
-    // Always save to localStorage
-    this.saveToLocalStorage('theme', theme);
+    const firebaseAvailable = this.isFirebaseAvailable();
+    console.log(`[StorageService] Saving theme: ${theme}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
 
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
+    // Save to Firebase FIRST if available (Firebase is source of truth)
+    if (firebaseAvailable) {
       try {
+        console.log(`[StorageService] Writing theme to Firebase: ${theme}`);
         await firebaseService.setTheme(theme);
+        console.log(`[StorageService] Successfully wrote theme to Firebase`);
+
+        // Only update localStorage AFTER Firebase write succeeds
+        this.saveToLocalStorage('theme', theme);
+        console.log(`[StorageService] Cached theme to localStorage`);
       } catch (error) {
         console.error('Error setting theme in Firebase:', error);
+        // Don't update localStorage if Firebase write failed to avoid data inconsistency
+        throw error;
       }
+    } else {
+      // Firebase not available - save to localStorage only (offline mode)
+      console.warn(`[StorageService] Firebase NOT available - saving theme to localStorage only`);
+      this.saveToLocalStorage('theme', theme);
     }
   }
 
@@ -521,16 +562,28 @@ class StorageService {
    * @returns {Promise<void>}
    */
   async setHighlightSettings(settings) {
-    // Always save to localStorage
-    this.saveToLocalStorage('highlightSettings', settings);
+    const firebaseAvailable = this.isFirebaseAvailable();
+    console.log(`[StorageService] Saving highlight settings, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
 
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
+    // Save to Firebase FIRST if available (Firebase is source of truth)
+    if (firebaseAvailable) {
       try {
+        console.log(`[StorageService] Writing highlight settings to Firebase`);
         await firebaseService.setHighlightSettings(settings);
+        console.log(`[StorageService] Successfully wrote highlight settings to Firebase`);
+
+        // Only update localStorage AFTER Firebase write succeeds
+        this.saveToLocalStorage('highlightSettings', settings);
+        console.log(`[StorageService] Cached highlight settings to localStorage`);
       } catch (error) {
         console.error('Error setting highlight settings in Firebase:', error);
+        // Don't update localStorage if Firebase write failed to avoid data inconsistency
+        throw error;
       }
+    } else {
+      // Firebase not available - save to localStorage only (offline mode)
+      console.warn(`[StorageService] Firebase NOT available - saving highlight settings to localStorage only`);
+      this.saveToLocalStorage('highlightSettings', settings);
     }
   }
 
