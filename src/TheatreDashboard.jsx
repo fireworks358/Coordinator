@@ -3,6 +3,9 @@ import TheatreTile from './TheatreTile.jsx';
 import EditModal from './EditModal.jsx';
 import PractitionerSidebar from './components/PractitionerSidebar.jsx';
 import PractitionerDropModal from './components/PractitionerDropModal.jsx';
+import ChangeLogViewer from './components/ChangeLogViewer.jsx';
+import SnapshotViewer from './components/SnapshotViewer.jsx';
+import OfflineBanner from './components/OfflineBanner.jsx';
 import './TheatreDashboard.css';
 import { useTheatreData } from './hooks/useTheatreData.js';
 import { usePractitionerData } from './hooks/usePractitionerData.js';
@@ -10,6 +13,7 @@ import { useTheme, useHighlightSettings } from './hooks/useSettings.js';
 import { useLunchRequests } from './hooks/useLunchRequests.js';
 import { useRosterDate } from './hooks/useRosterDate.js';
 import storageService from './services/storageService.js';
+import snapshotService from './services/snapshotService.js';
 import * as XLSX from 'xlsx';
 import { getCurrentDayOfWeek, formatRosterDate } from './utils/dateUtils.js';
 
@@ -44,6 +48,10 @@ const TheatreDashboard = () => {
     // Data controls dropdown state
     const [isDataDropdownVisible, setIsDataDropdownVisible] = useState(false);
 
+    // Change log and snapshot viewer states
+    const [isChangeLogViewerOpen, setIsChangeLogViewerOpen] = useState(false);
+    const [isSnapshotViewerOpen, setIsSnapshotViewerOpen] = useState(false);
+
     // Practitioner drop modal state
     const [dropModalState, setDropModalState] = useState({
         isOpen: false,
@@ -64,14 +72,43 @@ const TheatreDashboard = () => {
         return () => clearInterval(timer);
     }, []);
 
-    // Load saved selected day on mount
+    // Check for date rollover and set initial day on mount
     useEffect(() => {
-        const loadSelectedDay = async () => {
-            const savedDay = await storageService.getSelectedDay();
-            setSelectedDay(savedDay || getCurrentDayOfWeek());
+        const initializeSelectedDay = async () => {
+            try {
+                // Get last access date from Firebase
+                const lastAccessDate = await storageService.getLastAccessDate();
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+                // If last access was different calendar day, reset to current day
+                if (!lastAccessDate || lastAccessDate !== today) {
+                    const currentDay = getCurrentDayOfWeek();
+                    console.log(`[TheatreDashboard] Date changed or first load - resetting to ${currentDay}`);
+                    setSelectedDay(currentDay);
+                    await storageService.setLastAccessDate(today);
+                } else {
+                    // Same day - keep current day (default from useState)
+                    console.log(`[TheatreDashboard] Same day - using ${getCurrentDayOfWeek()}`);
+                }
+            } catch (error) {
+                console.error('[TheatreDashboard] Error checking date rollover:', error);
+                // Fallback to current day if error
+                setSelectedDay(getCurrentDayOfWeek());
+            }
         };
-        loadSelectedDay();
+        initializeSelectedDay();
     }, []);
+
+    // Start/stop snapshot service
+    useEffect(() => {
+        // Start snapshots for selected day
+        snapshotService.startAutoSnapshots(selectedDay);
+
+        // Update day when it changes
+        return () => {
+            // Cleanup handled by startAutoSnapshots (it clears old interval)
+        };
+    }, [selectedDay]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -106,9 +143,13 @@ const TheatreDashboard = () => {
             setSelectedTheatre(null);
         }
 
-        // Hooks auto-save current day and load new day
-        await storageService.setSelectedDay(newDay);
+        // Update selected day state (hooks will auto-save and load new day)
         setSelectedDay(newDay);
+
+        // Update last access date to today (so we remember we were active today)
+        const today = new Date().toISOString().split('T')[0];
+        await storageService.setLastAccessDate(today);
+
         console.log(`[TheatreDashboard] selectedDay state updated to: ${newDay}`);
         setIsDayDropdownVisible(false); // Close dropdown after selection
     };
@@ -918,6 +959,26 @@ const TheatreDashboard = () => {
                                 </button>
 
                                 <button
+                                    className="dropdown-item-btn"
+                                    onClick={() => {
+                                        setIsChangeLogViewerOpen(true);
+                                        setIsDataDropdownVisible(false);
+                                    }}
+                                >
+                                    View Change Log
+                                </button>
+
+                                <button
+                                    className="dropdown-item-btn"
+                                    onClick={() => {
+                                        setIsSnapshotViewerOpen(true);
+                                        setIsDataDropdownVisible(false);
+                                    }}
+                                >
+                                    Restore from Snapshot
+                                </button>
+
+                                <button
                                     className="dropdown-item-btn danger"
                                     onClick={() => {
                                         handleClearAll();
@@ -1215,6 +1276,28 @@ const TheatreDashboard = () => {
                 onSecondPractitioner={handleDropSecondPractitioner}
                 onRelief={handleDropRelief}
                 onCancel={handleDropCancel}
+            />
+
+            {/* Offline Banner */}
+            <OfflineBanner />
+
+            {/* Change Log Viewer */}
+            <ChangeLogViewer
+                isOpen={isChangeLogViewerOpen}
+                onClose={() => setIsChangeLogViewerOpen(false)}
+                selectedDay={selectedDay}
+            />
+
+            {/* Snapshot Viewer */}
+            <SnapshotViewer
+                isOpen={isSnapshotViewerOpen}
+                onClose={() => setIsSnapshotViewerOpen(false)}
+                selectedDay={selectedDay}
+                onRestore={() => {
+                    // Reload data after snapshot restore
+                    // The hooks will automatically re-fetch from Firebase
+                    console.log('[TheatreDashboard] Snapshot restored - data will reload automatically');
+                }}
             />
 
             {/* Version and Copyright Footer */}

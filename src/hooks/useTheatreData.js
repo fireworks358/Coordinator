@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import storageService from '../services/storageService.js';
+import changeLogService from '../services/changeLogService.js';
 
 const initialTheatreData = [
     { name: 'Theatre E1', currentOdp: '', theatreEta: '', practitionerEndTime: '', nextPractitioner: '', status: 'Not Running', phoneExtension: '', order: 0},
@@ -144,9 +145,44 @@ export const useTheatreData = (selectedDay) => {
     // Only save if not a Firebase update (user-initiated change)
     if (!isLoading) {
       console.log(`[useTheatreData] Saving ${theatres.length} theatres to ${selectedDay}`);
-      storageService.setTheatresForDay(selectedDay, theatres).catch(error => {
-        console.error('Error saving theatres:', error);
-      });
+
+      // Save with change logging
+      const saveWithLogging = async () => {
+        try {
+          // Get old state before save (for change logging)
+          let oldTheatres = [];
+          try {
+            oldTheatres = await storageService.getTheatresForDay(selectedDay);
+          } catch (error) {
+            // If we can't get old state, just skip logging (might be offline or first time)
+            console.log('[useTheatreData] Could not get old state for change logging:', error.message);
+          }
+
+          // Save new state
+          await storageService.setTheatresForDay(selectedDay, theatres);
+
+          // Log changes if we got old state
+          if (oldTheatres.length > 0) {
+            // Compare and log changes for each theatre
+            for (const newTheatre of theatres) {
+              const oldTheatre = oldTheatres.find(t => t.name === newTheatre.name);
+              if (oldTheatre) {
+                // Log field-level changes
+                await changeLogService.logTheatreChanges(
+                  selectedDay,
+                  newTheatre.name,
+                  oldTheatre,
+                  newTheatre
+                );
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error saving theatres:', error);
+        }
+      };
+
+      saveWithLogging();
     } else {
       console.log(`[useTheatreData] Skipping save - still loading`);
     }

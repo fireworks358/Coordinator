@@ -494,6 +494,36 @@ class FirebaseService {
     }
   }
 
+  /**
+   * Get last access date from Firebase (for rollover detection)
+   * @returns {Promise<string|null>} Last access date in YYYY-MM-DD format or null
+   */
+  async getLastAccessDate() {
+    try {
+      const dateRef = ref(database, `${DB_PATH}/settings/lastAccessDate`);
+      const snapshot = await get(dateRef);
+      return snapshot.val() || null;
+    } catch (error) {
+      console.error('Error getting last access date from Firebase:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Set last access date in Firebase (for rollover detection)
+   * @param {string} date - Date in YYYY-MM-DD format
+   * @returns {Promise<void>}
+   */
+  async setLastAccessDate(date) {
+    try {
+      const dateRef = ref(database, `${DB_PATH}/settings/lastAccessDate`);
+      await set(dateRef, date);
+    } catch (error) {
+      console.error('Error setting last access date in Firebase:', error);
+      throw error;
+    }
+  }
+
   // ==================== UTILITY OPERATIONS ====================
 
   /**

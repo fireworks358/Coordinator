@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import storageService from '../services/storageService.js';
+import changeLogService from '../services/changeLogService.js';
 
 const defaultPractitioners = [
     { name: 'M Varghese', endTime: '17:30', relieved: false, supper: false, sick: false },
@@ -113,9 +114,44 @@ export const usePractitionerData = (selectedDay) => {
     // Only save if not a Firebase update (user-initiated change)
     if (!isLoading) {
       console.log(`[usePractitionerData] Saving ${practitionerList.length} practitioners to ${selectedDay}`);
-      storageService.setPractitionersForDay(selectedDay, practitionerList).catch(error => {
-        console.error('Error saving practitioners:', error);
-      });
+
+      // Save with change logging
+      const saveWithLogging = async () => {
+        try {
+          // Get old state before save (for change logging)
+          let oldPractitioners = [];
+          try {
+            oldPractitioners = await storageService.getPractitionersForDay(selectedDay);
+          } catch (error) {
+            // If we can't get old state, just skip logging (might be offline or first time)
+            console.log('[usePractitionerData] Could not get old state for change logging:', error.message);
+          }
+
+          // Save new state
+          await storageService.setPractitionersForDay(selectedDay, practitionerList);
+
+          // Log changes if we got old state
+          if (oldPractitioners.length > 0) {
+            // Compare and log changes for each practitioner
+            for (const newPractitioner of practitionerList) {
+              const oldPractitioner = oldPractitioners.find(p => p.name === newPractitioner.name);
+              if (oldPractitioner) {
+                // Log field-level changes
+                await changeLogService.logPractitionerChanges(
+                  selectedDay,
+                  newPractitioner.name,
+                  oldPractitioner,
+                  newPractitioner
+                );
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error saving practitioners:', error);
+        }
+      };
+
+      saveWithLogging();
     } else {
       console.log(`[usePractitionerData] Skipping save - still loading`);
     }

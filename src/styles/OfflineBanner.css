@@ -1,0 +1,74 @@
+/* src/styles/OfflineBanner.css */
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.offline-banner.offline {
+  background: #f44336;
+  color: white;
+}
+
+.offline-banner.online {
+  background: #4caf50;
+  color: white;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.status-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.status-message {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.dismiss-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 10px;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.dismiss-button:hover {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Push content down when banner is visible */
+body:has(.offline-banner) {
+  padding-top: 48px;
+}

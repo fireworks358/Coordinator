@@ -1,8 +1,8 @@
 // src/services/storageService.js
-// Unified storage interface with Firebase and localStorage fallback
+// Firebase-only storage interface (localStorage removed)
 
 import firebaseService from './firebaseService.js';
-import { safeStringify, safeParse } from './dataTransformers.js';
+import { safeParse } from './dataTransformers.js';
 import { getCurrentDayOfWeek, getAllDays } from '../utils/dateUtils.js';
 
 // ===== FIREBASE TOGGLE =====
@@ -12,46 +12,158 @@ const USE_FIREBASE = true; // Change to true to re-enable Firebase
 
 /**
  * Storage Service Class
- * Provides unified interface for data operations with automatic fallback
+ * Provides unified interface for data operations - Firebase only (localStorage removed)
  */
 class StorageService {
   constructor() {
-    this.mode = USE_FIREBASE ? 'firebase' : 'localStorage';
-
-    // Run migration before anything else
-    this.migrateToWeeklyStructure();
+    this.mode = USE_FIREBASE ? 'firebase' : 'disabled';
+    this.migrationComplete = false;
 
     if (USE_FIREBASE) {
-      this.initializeConnectionMonitoring();
+      // Run one-time migration from localStorage to Firebase
+      this.checkAndMigrateLocalStorage();
     } else {
-      console.log('Firebase disabled - using localStorage only');
+      console.log('Firebase disabled - app will not function');
     }
   }
 
   /**
-   * Monitor connection and switch modes automatically
+   * Check for localStorage data and migrate to Firebase if needed
    */
-  initializeConnectionMonitoring() {
-    // Log initial connection status
-    const initialStatus = firebaseService.getConnectionStatus();
-    console.log(`[StorageService] Initial Firebase connection status: ${initialStatus}`);
+  async checkAndMigrateLocalStorage() {
+    try {
+      // Check if localStorage has data
+      const hasLocalData = localStorage.getItem('theatresByDay') ||
+                           localStorage.getItem('practitionersByDay') ||
+                           localStorage.getItem('theatreData') ||
+                           localStorage.getItem('practitionerListData');
 
-    // Check connection status periodically
-    setInterval(() => {
-      const isConnected = firebaseService.getConnectionStatus();
-      if (this.mode === 'firebase' && !isConnected) {
-        console.warn('[StorageService] Firebase disconnected. Switching to localStorage mode.');
-        this.mode = 'localStorage';
-      } else if (this.mode === 'localStorage' && isConnected) {
-        console.log('[StorageService] Firebase reconnected. Switching back to Firebase mode.');
-        this.mode = 'firebase';
+      if (!hasLocalData) {
+        console.log('[Migration] No localStorage data to migrate');
+        this.migrationComplete = true;
+        return;
       }
-    }, 5000); // Check every 5 seconds
+
+      // Check if already migrated
+      const migrated = localStorage.getItem('migrationComplete');
+      if (migrated === 'true') {
+        console.log('[Migration] Already migrated');
+        this.migrationComplete = true;
+        return;
+      }
+
+      console.log('[Migration] Starting localStorage to Firebase migration...');
+      await this.migrateLocalStorageToFirebase();
+
+      // Mark migration complete
+      localStorage.setItem('migrationComplete', 'true');
+      this.migrationComplete = true;
+
+      console.log('[Migration] Migration complete - localStorage data has been copied to Firebase');
+      console.log('[Migration] You can now clear localStorage if desired');
+
+    } catch (error) {
+      console.error('[Migration] Migration failed:', error);
+      console.error('[Migration] Please ensure Firebase is configured correctly');
+      // Don't clear localStorage if migration failed
+    }
+  }
+
+  /**
+   * Migrate all localStorage data to Firebase (one-time operation)
+   */
+  async migrateLocalStorageToFirebase() {
+    try {
+      // Helper to safely parse localStorage
+      const loadLocal = (key, defaultValue) => {
+        try {
+          const jsonString = localStorage.getItem(key);
+          return safeParse(jsonString, defaultValue);
+        } catch (error) {
+          console.error(`Error loading ${key} from localStorage:`, error);
+          return defaultValue;
+        }
+      };
+
+      // Load all localStorage data
+      const theatresByDay = loadLocal('theatresByDay', null);
+      const practitionersByDay = loadLocal('practitionersByDay', null);
+      const rosterDatesByDay = loadLocal('rosterDatesByDay', {});
+      const theme = loadLocal('theme', 'dark');
+      const highlightSettings = loadLocal('highlightSettings', null);
+
+      // Also check for legacy data
+      const legacyTheatres = loadLocal('theatreData', null);
+      const legacyPractitioners = loadLocal('practitionerListData', null);
+
+      // Migrate day-based data
+      if (theatresByDay) {
+        console.log('[Migration] Migrating theatresByDay...');
+        const days = Object.keys(theatresByDay);
+        for (const day of days) {
+          if (theatresByDay[day] && theatresByDay[day].length > 0) {
+            await firebaseService.setTheatresForDay(day, theatresByDay[day]);
+            console.log(`[Migration] Migrated ${theatresByDay[day].length} theatres for ${day}`);
+          }
+        }
+      } else if (legacyTheatres) {
+        // Migrate legacy theatre data to current day
+        console.log('[Migration] Migrating legacy theatreData...');
+        const today = getCurrentDayOfWeek();
+        await firebaseService.setTheatresForDay(today, legacyTheatres);
+        console.log(`[Migration] Migrated ${legacyTheatres.length} legacy theatres to ${today}`);
+      }
+
+      if (practitionersByDay) {
+        console.log('[Migration] Migrating practitionersByDay...');
+        const days = Object.keys(practitionersByDay);
+        for (const day of days) {
+          if (practitionersByDay[day] && practitionersByDay[day].length > 0) {
+            await firebaseService.setPractitionersForDay(day, practitionersByDay[day]);
+            console.log(`[Migration] Migrated ${practitionersByDay[day].length} practitioners for ${day}`);
+          }
+        }
+      } else if (legacyPractitioners) {
+        // Migrate legacy practitioner data to current day
+        console.log('[Migration] Migrating legacy practitionerListData...');
+        const today = getCurrentDayOfWeek();
+        await firebaseService.setPractitionersForDay(today, legacyPractitioners);
+        console.log(`[Migration] Migrated ${legacyPractitioners.length} legacy practitioners to ${today}`);
+      }
+
+      // Migrate roster dates
+      if (rosterDatesByDay && Object.keys(rosterDatesByDay).length > 0) {
+        console.log('[Migration] Migrating rosterDatesByDay...');
+        const days = Object.keys(rosterDatesByDay);
+        for (const day of days) {
+          if (rosterDatesByDay[day]) {
+            await firebaseService.setRosterDateForDay(day, rosterDatesByDay[day]);
+          }
+        }
+      }
+
+      // Migrate settings
+      if (theme) {
+        console.log('[Migration] Migrating theme...');
+        await firebaseService.setTheme(theme);
+      }
+
+      if (highlightSettings) {
+        console.log('[Migration] Migrating highlightSettings...');
+        await firebaseService.setHighlightSettings(highlightSettings);
+      }
+
+      console.log('[Migration] All data migrated to Firebase successfully');
+
+    } catch (error) {
+      console.error('[Migration] Error during migration:', error);
+      throw error;
+    }
   }
 
   /**
    * Get current storage mode
-   * @returns {string} Current mode ('firebase' or 'localStorage')
+   * @returns {string} Current mode ('firebase' or 'disabled')
    */
   getMode() {
     return this.mode;
@@ -65,217 +177,27 @@ class StorageService {
     return this.mode === 'firebase' && firebaseService.getConnectionStatus();
   }
 
-  // ==================== LOCAL STORAGE HELPERS ====================
-
-  /**
-   * Save to localStorage with error handling
-   * @param {string} key - Storage key
-   * @param {*} data - Data to store
-   */
-  saveToLocalStorage(key, data) {
-    try {
-      const jsonString = safeStringify(data);
-      if (jsonString) {
-        localStorage.setItem(key, jsonString);
-      }
-    } catch (error) {
-      console.error(`Error saving to localStorage (${key}):`, error);
-    }
-  }
-
-  /**
-   * Load from localStorage with error handling
-   * @param {string} key - Storage key
-   * @param {*} defaultValue - Default value if key doesn't exist
-   * @returns {*} Parsed data or default value
-   */
-  loadFromLocalStorage(key, defaultValue) {
-    try {
-      const jsonString = localStorage.getItem(key);
-      return safeParse(jsonString, defaultValue);
-    } catch (error) {
-      console.error(`Error loading from localStorage (${key}):`, error);
-      return defaultValue;
-    }
-  }
-
-  // ==================== THEATRE OPERATIONS ====================
-
-  /**
-   * Get all theatres (from Firebase or localStorage)
-   * @returns {Promise<Array>} Array of theatre objects
-   */
-  async getTheatres() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        return await firebaseService.getTheatres();
-      } catch (error) {
-        console.error('Error getting theatres from Firebase, falling back to localStorage:', error);
-      }
-    }
-
-    // Fallback to localStorage
-    return this.loadFromLocalStorage('theatreData', []);
-  }
-
-  /**
-   * Set a single theatre
-   * @param {string} theatreName - Theatre name
-   * @param {Object} theatreData - Theatre data object
-   * @returns {Promise<void>}
-   */
-  async setTheatre(theatreName, theatreData) {
-    // Always save to localStorage for redundancy
-    const currentTheatres = this.loadFromLocalStorage('theatreData', []);
-    const updatedTheatres = currentTheatres.map(t =>
-      t.name === theatreName ? { ...t, ...theatreData } : t
-    );
-    this.saveToLocalStorage('theatreData', updatedTheatres);
-
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.setTheatre(theatreName, theatreData);
-      } catch (error) {
-        console.error('Error setting theatre in Firebase:', error);
-      }
-    }
-  }
-
-  /**
-   * Set all theatres
-   * @param {Array} theatresArray - Array of theatre objects
-   * @returns {Promise<void>}
-   */
-  async setTheatres(theatresArray) {
-    // Always save to localStorage for redundancy
-    this.saveToLocalStorage('theatreData', theatresArray);
-
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.setTheatres(theatresArray);
-      } catch (error) {
-        console.error('Error setting theatres in Firebase:', error);
-      }
-    }
-  }
-
-  /**
-   * Subscribe to theatre changes
-   * @param {Function} callback - Function to call when theatres change
-   * @returns {Function} Unsubscribe function
-   */
-  subscribeToTheatres(callback) {
-    // Always subscribe - Firebase listeners work even when not connected yet
-    // They will automatically start receiving updates once connection is established
-    return firebaseService.subscribeToTheatres(callback);
-  }
-
-  // ==================== PRACTITIONER OPERATIONS ====================
-
-  /**
-   * Get all practitioners (from Firebase or localStorage)
-   * @returns {Promise<Array>} Array of practitioner objects
-   */
-  async getPractitioners() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        return await firebaseService.getPractitioners();
-      } catch (error) {
-        console.error('Error getting practitioners from Firebase, falling back to localStorage:', error);
-      }
-    }
-
-    // Fallback to localStorage
-    return this.loadFromLocalStorage('practitionerListData', []);
-  }
-
-  /**
-   * Set all practitioners
-   * @param {Array} practitionersArray - Array of practitioner objects
-   * @returns {Promise<void>}
-   */
-  async setPractitioners(practitionersArray) {
-    // Always save to localStorage for redundancy
-    this.saveToLocalStorage('practitionerListData', practitionersArray);
-
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.setPractitioners(practitionersArray);
-      } catch (error) {
-        console.error('Error setting practitioners in Firebase:', error);
-      }
-    }
-  }
-
-  /**
-   * Update a single practitioner field
-   * @param {string} practitionerName - Practitioner name
-   * @param {Object} updates - Object with fields to update
-   * @returns {Promise<void>}
-   */
-  async updatePractitioner(practitionerName, updates) {
-    // Update in localStorage
-    const currentPractitioners = this.loadFromLocalStorage('practitionerListData', []);
-    const updatedPractitioners = currentPractitioners.map(p =>
-      p.name === practitionerName ? { ...p, ...updates } : p
-    );
-    this.saveToLocalStorage('practitionerListData', updatedPractitioners);
-
-    // Try to update in Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.updatePractitioner(practitionerName, updates);
-      } catch (error) {
-        console.error('Error updating practitioner in Firebase:', error);
-      }
-    }
-  }
-
-  /**
-   * Subscribe to practitioner changes
-   * @param {Function} callback - Function to call when practitioners change
-   * @returns {Function} Unsubscribe function
-   */
-  subscribeToPractitioners(callback) {
-    // Always subscribe - Firebase listeners work even when not connected yet
-    // They will automatically start receiving updates once connection is established
-    return firebaseService.subscribeToPractitioners(callback);
-  }
-
   // ==================== DAY-BASED THEATRE OPERATIONS ====================
 
   /**
    * Get theatres for a specific day
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @returns {Promise<Array>} Array of theatre objects
+   * @throws {Error} If Firebase is offline
    */
   async getTheatresForDay(dayOfWeek) {
-    // Try Firebase first if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        const firebaseData = await firebaseService.getTheatresForDay(dayOfWeek);
-        console.log(`[StorageService] Loaded ${firebaseData?.length || 0} theatres for ${dayOfWeek} from Firebase`);
-
-        // Always trust Firebase as source of truth when it's available
-        // Also sync this data to localStorage for offline access
-        if (firebaseData) {
-          const data = this.loadFromLocalStorage('theatresByDay', {});
-          data[dayOfWeek] = firebaseData;
-          this.saveToLocalStorage('theatresByDay', data);
-          return firebaseData;
-        }
-      } catch (error) {
-        console.error(`Error getting theatres for ${dayOfWeek} from Firebase:`, error);
-      }
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot load theatres - Firebase is offline');
     }
 
-    // Only fallback to localStorage if Firebase is NOT available (disconnected)
-    const data = this.loadFromLocalStorage('theatresByDay', {});
-    console.log(`[StorageService] Firebase unavailable - loading theatres for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'theatres');
-    return data[dayOfWeek] || [];
+    try {
+      const firebaseData = await firebaseService.getTheatresForDay(dayOfWeek);
+      console.log(`[StorageService] Loaded ${firebaseData?.length || 0} theatres for ${dayOfWeek} from Firebase`);
+      return firebaseData;
+    } catch (error) {
+      console.error(`Error getting theatres for ${dayOfWeek} from Firebase:`, error);
+      throw new Error(`Failed to load theatres for ${dayOfWeek}. Please check your connection.`);
+    }
   }
 
   /**
@@ -283,34 +205,20 @@ class StorageService {
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @param {Array} theatresArray - Array of theatre objects
    * @returns {Promise<void>}
+   * @throws {Error} If Firebase is offline
    */
   async setTheatresForDay(dayOfWeek, theatresArray) {
-    const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Saving ${theatresArray.length} theatres to ${dayOfWeek}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot save theatres - Firebase is offline');
+    }
 
-    // Save to Firebase FIRST if available (Firebase is source of truth)
-    if (firebaseAvailable) {
-      try {
-        console.log(`[StorageService] Writing ${theatresArray.length} theatres to Firebase for ${dayOfWeek}`);
-        await firebaseService.setTheatresForDay(dayOfWeek, theatresArray);
-        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
-
-        // Only update localStorage AFTER Firebase write succeeds
-        const allData = this.loadFromLocalStorage('theatresByDay', {});
-        allData[dayOfWeek] = theatresArray;
-        this.saveToLocalStorage('theatresByDay', allData);
-        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
-      } catch (error) {
-        console.error(`Error saving theatres for ${dayOfWeek} to Firebase:`, error);
-        // Don't update localStorage if Firebase write failed to avoid data inconsistency
-        throw error;
-      }
-    } else {
-      // Firebase not available - save to localStorage only (offline mode)
-      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
-      const allData = this.loadFromLocalStorage('theatresByDay', {});
-      allData[dayOfWeek] = theatresArray;
-      this.saveToLocalStorage('theatresByDay', allData);
+    try {
+      console.log(`[StorageService] Saving ${theatresArray.length} theatres to ${dayOfWeek}`);
+      await firebaseService.setTheatresForDay(dayOfWeek, theatresArray);
+      console.log(`[StorageService] Successfully saved to Firebase for ${dayOfWeek}`);
+    } catch (error) {
+      console.error(`Error saving theatres for ${dayOfWeek} to Firebase:`, error);
+      throw new Error(`Failed to save theatres for ${dayOfWeek}. Please check your connection.`);
     }
   }
 
@@ -321,13 +229,11 @@ class StorageService {
    * @returns {Function} Unsubscribe function
    */
   subscribeToTheatresForDay(dayOfWeek, callback) {
-    // Always subscribe if Firebase is enabled, even if not connected yet
-    // Firebase listeners will automatically sync when connection is established
     if (USE_FIREBASE) {
       return firebaseService.subscribeToTheatresForDay(dayOfWeek, callback);
     }
-    // Return no-op unsubscribe function when Firebase is toggled off
-    console.log(`[StorageService] Firebase toggled off - no subscription for theatres on ${dayOfWeek}`);
+    // Return no-op unsubscribe function when Firebase is disabled
+    console.log(`[StorageService] Firebase disabled - no subscription for theatres on ${dayOfWeek}`);
     return () => {};
   }
 
@@ -337,31 +243,21 @@ class StorageService {
    * Get practitioners for a specific day
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @returns {Promise<Array>} Array of practitioner objects
+   * @throws {Error} If Firebase is offline
    */
   async getPractitionersForDay(dayOfWeek) {
-    // Try Firebase first if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        const firebaseData = await firebaseService.getPractitionersForDay(dayOfWeek);
-        console.log(`[StorageService] Loaded ${firebaseData?.length || 0} practitioners for ${dayOfWeek} from Firebase`);
-
-        // Always trust Firebase as source of truth when it's available
-        // Also sync this data to localStorage for offline access
-        if (firebaseData) {
-          const data = this.loadFromLocalStorage('practitionersByDay', {});
-          data[dayOfWeek] = firebaseData;
-          this.saveToLocalStorage('practitionersByDay', data);
-          return firebaseData;
-        }
-      } catch (error) {
-        console.error(`Error getting practitioners for ${dayOfWeek} from Firebase:`, error);
-      }
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot load practitioners - Firebase is offline');
     }
 
-    // Only fallback to localStorage if Firebase is NOT available (disconnected)
-    const data = this.loadFromLocalStorage('practitionersByDay', {});
-    console.log(`[StorageService] Firebase unavailable - loading practitioners for ${dayOfWeek} from localStorage:`, data[dayOfWeek]?.length || 0, 'practitioners');
-    return data[dayOfWeek] || [];
+    try {
+      const firebaseData = await firebaseService.getPractitionersForDay(dayOfWeek);
+      console.log(`[StorageService] Loaded ${firebaseData?.length || 0} practitioners for ${dayOfWeek} from Firebase`);
+      return firebaseData;
+    } catch (error) {
+      console.error(`Error getting practitioners for ${dayOfWeek} from Firebase:`, error);
+      throw new Error(`Failed to load practitioners for ${dayOfWeek}. Please check your connection.`);
+    }
   }
 
   /**
@@ -369,34 +265,20 @@ class StorageService {
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @param {Array} practitionersArray - Array of practitioner objects
    * @returns {Promise<void>}
+   * @throws {Error} If Firebase is offline
    */
   async setPractitionersForDay(dayOfWeek, practitionersArray) {
-    const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Saving ${practitionersArray.length} practitioners to ${dayOfWeek}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot save practitioners - Firebase is offline');
+    }
 
-    // Save to Firebase FIRST if available (Firebase is source of truth)
-    if (firebaseAvailable) {
-      try {
-        console.log(`[StorageService] Writing ${practitionersArray.length} practitioners to Firebase for ${dayOfWeek}`);
-        await firebaseService.setPractitionersForDay(dayOfWeek, practitionersArray);
-        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
-
-        // Only update localStorage AFTER Firebase write succeeds
-        const allData = this.loadFromLocalStorage('practitionersByDay', {});
-        allData[dayOfWeek] = practitionersArray;
-        this.saveToLocalStorage('practitionersByDay', allData);
-        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
-      } catch (error) {
-        console.error(`Error saving practitioners for ${dayOfWeek} to Firebase:`, error);
-        // Don't update localStorage if Firebase write failed to avoid data inconsistency
-        throw error;
-      }
-    } else {
-      // Firebase not available - save to localStorage only (offline mode)
-      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
-      const allData = this.loadFromLocalStorage('practitionersByDay', {});
-      allData[dayOfWeek] = practitionersArray;
-      this.saveToLocalStorage('practitionersByDay', allData);
+    try {
+      console.log(`[StorageService] Saving ${practitionersArray.length} practitioners to ${dayOfWeek}`);
+      await firebaseService.setPractitionersForDay(dayOfWeek, practitionersArray);
+      console.log(`[StorageService] Successfully saved to Firebase for ${dayOfWeek}`);
+    } catch (error) {
+      console.error(`Error saving practitioners for ${dayOfWeek} to Firebase:`, error);
+      throw new Error(`Failed to save practitioners for ${dayOfWeek}. Please check your connection.`);
     }
   }
 
@@ -407,13 +289,11 @@ class StorageService {
    * @returns {Function} Unsubscribe function
    */
   subscribeToPractitionersForDay(dayOfWeek, callback) {
-    // Always subscribe if Firebase is enabled, even if not connected yet
-    // Firebase listeners will automatically sync when connection is established
     if (USE_FIREBASE) {
       return firebaseService.subscribeToPractitionersForDay(dayOfWeek, callback);
     }
-    // Return no-op unsubscribe function when Firebase is toggled off
-    console.log(`[StorageService] Firebase toggled off - no subscription for practitioners on ${dayOfWeek}`);
+    // Return no-op unsubscribe function when Firebase is disabled
+    console.log(`[StorageService] Firebase disabled - no subscription for practitioners on ${dayOfWeek}`);
     return () => {};
   }
 
@@ -423,29 +303,21 @@ class StorageService {
    * Get roster date for a specific day
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @returns {Promise<string|null>} Roster date string or null
+   * @throws {Error} If Firebase is offline
    */
   async getRosterDateForDay(dayOfWeek) {
-    // Try Firebase first if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        const firebaseData = await firebaseService.getRosterDateForDay(dayOfWeek);
-        console.log(`[StorageService] Loaded roster date for ${dayOfWeek} from Firebase:`, firebaseData || 'null');
-
-        // Always trust Firebase as source of truth when it's available
-        // Also sync this data to localStorage for offline access
-        const data = this.loadFromLocalStorage('rosterDatesByDay', {});
-        data[dayOfWeek] = firebaseData || null;
-        this.saveToLocalStorage('rosterDatesByDay', data);
-        return firebaseData || null;
-      } catch (error) {
-        console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
-      }
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot load roster date - Firebase is offline');
     }
 
-    // Only fallback to localStorage if Firebase is NOT available (disconnected)
-    const data = this.loadFromLocalStorage('rosterDatesByDay', {});
-    console.log(`[StorageService] Firebase unavailable - loading roster date for ${dayOfWeek} from localStorage:`, data[dayOfWeek]);
-    return data[dayOfWeek] || null;
+    try {
+      const firebaseData = await firebaseService.getRosterDateForDay(dayOfWeek);
+      console.log(`[StorageService] Loaded roster date for ${dayOfWeek} from Firebase:`, firebaseData || 'null');
+      return firebaseData || null;
+    } catch (error) {
+      console.error(`Error getting roster date for ${dayOfWeek} from Firebase:`, error);
+      throw new Error(`Failed to load roster date for ${dayOfWeek}. Please check your connection.`);
+    }
   }
 
   /**
@@ -453,34 +325,20 @@ class StorageService {
    * @param {string} dayOfWeek - Day name (e.g., 'monday')
    * @param {string} rosterDate - Roster date string
    * @returns {Promise<void>}
+   * @throws {Error} If Firebase is offline
    */
   async setRosterDateForDay(dayOfWeek, rosterDate) {
-    const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate, `Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot save roster date - Firebase is offline');
+    }
 
-    // Save to Firebase FIRST if available (Firebase is source of truth)
-    if (firebaseAvailable) {
-      try {
-        console.log(`[StorageService] Writing roster date to Firebase for ${dayOfWeek}`);
-        await firebaseService.setRosterDateForDay(dayOfWeek, rosterDate);
-        console.log(`[StorageService] Successfully wrote to Firebase for ${dayOfWeek}`);
-
-        // Only update localStorage AFTER Firebase write succeeds
-        const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
-        allData[dayOfWeek] = rosterDate;
-        this.saveToLocalStorage('rosterDatesByDay', allData);
-        console.log(`[StorageService] Cached to localStorage for ${dayOfWeek}`);
-      } catch (error) {
-        console.error(`Error saving roster date for ${dayOfWeek} to Firebase:`, error);
-        // Don't update localStorage if Firebase write failed to avoid data inconsistency
-        throw error;
-      }
-    } else {
-      // Firebase not available - save to localStorage only (offline mode)
-      console.warn(`[StorageService] Firebase NOT available - saving to localStorage only for ${dayOfWeek}`);
-      const allData = this.loadFromLocalStorage('rosterDatesByDay', {});
-      allData[dayOfWeek] = rosterDate;
-      this.saveToLocalStorage('rosterDatesByDay', allData);
+    try {
+      console.log(`[StorageService] Saving roster date to ${dayOfWeek}:`, rosterDate);
+      await firebaseService.setRosterDateForDay(dayOfWeek, rosterDate);
+      console.log(`[StorageService] Successfully saved roster date to Firebase for ${dayOfWeek}`);
+    } catch (error) {
+      console.error(`Error saving roster date for ${dayOfWeek} to Firebase:`, error);
+      throw new Error(`Failed to save roster date for ${dayOfWeek}. Please check your connection.`);
     }
   }
 
@@ -489,101 +347,78 @@ class StorageService {
   /**
    * Get theme setting
    * @returns {Promise<string>} Theme value ('dark' or 'light')
+   * @throws {Error} If Firebase is offline
    */
   async getTheme() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        return await firebaseService.getTheme();
-      } catch (error) {
-        console.error('Error getting theme from Firebase, falling back to localStorage:', error);
-      }
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot load theme - Firebase is offline');
     }
 
-    // Fallback to localStorage
-    return this.loadFromLocalStorage('theme', 'dark');
+    try {
+      return await firebaseService.getTheme();
+    } catch (error) {
+      console.error('Error getting theme from Firebase:', error);
+      throw new Error('Failed to load theme. Please check your connection.');
+    }
   }
 
   /**
    * Set theme setting
    * @param {string} theme - Theme value ('dark' or 'light')
    * @returns {Promise<void>}
+   * @throws {Error} If Firebase is offline
    */
   async setTheme(theme) {
-    const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Saving theme: ${theme}, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot save theme - Firebase is offline');
+    }
 
-    // Save to Firebase FIRST if available (Firebase is source of truth)
-    if (firebaseAvailable) {
-      try {
-        console.log(`[StorageService] Writing theme to Firebase: ${theme}`);
-        await firebaseService.setTheme(theme);
-        console.log(`[StorageService] Successfully wrote theme to Firebase`);
-
-        // Only update localStorage AFTER Firebase write succeeds
-        this.saveToLocalStorage('theme', theme);
-        console.log(`[StorageService] Cached theme to localStorage`);
-      } catch (error) {
-        console.error('Error setting theme in Firebase:', error);
-        // Don't update localStorage if Firebase write failed to avoid data inconsistency
-        throw error;
-      }
-    } else {
-      // Firebase not available - save to localStorage only (offline mode)
-      console.warn(`[StorageService] Firebase NOT available - saving theme to localStorage only`);
-      this.saveToLocalStorage('theme', theme);
+    try {
+      console.log(`[StorageService] Saving theme: ${theme}`);
+      await firebaseService.setTheme(theme);
+      console.log(`[StorageService] Successfully saved theme to Firebase`);
+    } catch (error) {
+      console.error('Error setting theme in Firebase:', error);
+      throw new Error('Failed to save theme. Please check your connection.');
     }
   }
 
   /**
    * Get highlight settings
    * @returns {Promise<Object>} Highlight settings object
+   * @throws {Error} If Firebase is offline
    */
   async getHighlightSettings() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        return await firebaseService.getHighlightSettings();
-      } catch (error) {
-        console.error('Error getting highlight settings from Firebase, falling back to localStorage:', error);
-      }
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot load highlight settings - Firebase is offline');
     }
 
-    // Fallback to localStorage
-    return this.loadFromLocalStorage('highlightSettings', {
-      highlightEarlies: true,
-      highlight1730s: true,
-      highlight1830s: true,
-      highlightLates: true
-    });
+    try {
+      return await firebaseService.getHighlightSettings();
+    } catch (error) {
+      console.error('Error getting highlight settings from Firebase:', error);
+      throw new Error('Failed to load highlight settings. Please check your connection.');
+    }
   }
 
   /**
    * Set highlight settings
    * @param {Object} settings - Highlight settings object
    * @returns {Promise<void>}
+   * @throws {Error} If Firebase is offline
    */
   async setHighlightSettings(settings) {
-    const firebaseAvailable = this.isFirebaseAvailable();
-    console.log(`[StorageService] Saving highlight settings, Firebase available: ${firebaseAvailable}, mode: ${this.mode}`);
+    if (!this.isFirebaseAvailable()) {
+      throw new Error('Cannot save highlight settings - Firebase is offline');
+    }
 
-    // Save to Firebase FIRST if available (Firebase is source of truth)
-    if (firebaseAvailable) {
-      try {
-        console.log(`[StorageService] Writing highlight settings to Firebase`);
-        await firebaseService.setHighlightSettings(settings);
-        console.log(`[StorageService] Successfully wrote highlight settings to Firebase`);
-
-        // Only update localStorage AFTER Firebase write succeeds
-        this.saveToLocalStorage('highlightSettings', settings);
-        console.log(`[StorageService] Cached highlight settings to localStorage`);
-      } catch (error) {
-        console.error('Error setting highlight settings in Firebase:', error);
-        // Don't update localStorage if Firebase write failed to avoid data inconsistency
-        throw error;
-      }
-    } else {
-      // Firebase not available - save to localStorage only (offline mode)
-      console.warn(`[StorageService] Firebase NOT available - saving highlight settings to localStorage only`);
-      this.saveToLocalStorage('highlightSettings', settings);
+    try {
+      console.log(`[StorageService] Saving highlight settings`);
+      await firebaseService.setHighlightSettings(settings);
+      console.log(`[StorageService] Successfully saved highlight settings to Firebase`);
+    } catch (error) {
+      console.error('Error setting highlight settings in Firebase:', error);
+      throw new Error('Failed to save highlight settings. Please check your connection.');
     }
   }
 
@@ -593,89 +428,90 @@ class StorageService {
    * @returns {Function} Unsubscribe function
    */
   subscribeToSettings(callback) {
-    // Always subscribe - Firebase listeners work even when not connected yet
-    // They will automatically start receiving updates once connection is established
     return firebaseService.subscribeToSettings(callback);
   }
 
   /**
-   * Get selected day
-   * @returns {Promise<string>} Selected day name (e.g., 'monday')
+   * Get last access date (for rollover detection)
+   * @returns {Promise<string|null>} Last access date in YYYY-MM-DD format or null
+   * @throws {Error} If Firebase is offline
    */
-  async getSelectedDay() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        const day = await firebaseService.getSelectedDay();
-        if (day) return day;
-      } catch (error) {
-        console.error('Error getting selected day from Firebase:', error);
-      }
+  async getLastAccessDate() {
+    if (!this.isFirebaseAvailable()) {
+      // Silently return null if offline - this is not critical
+      return null;
     }
 
-    // Fallback to localStorage
-    return this.loadFromLocalStorage('selectedDay', null) || getCurrentDayOfWeek();
+    try {
+      return await firebaseService.getLastAccessDate();
+    } catch (error) {
+      console.error('Error getting last access date from Firebase:', error);
+      return null; // Return null instead of throwing - not critical
+    }
   }
 
   /**
-   * Set selected day
-   * @param {string} dayOfWeek - Day name (e.g., 'monday')
+   * Set last access date (for rollover detection)
+   * @param {string} date - Date in YYYY-MM-DD format
    * @returns {Promise<void>}
    */
-  async setSelectedDay(dayOfWeek) {
-    // Save to localStorage
-    this.saveToLocalStorage('selectedDay', dayOfWeek);
+  async setLastAccessDate(date) {
+    if (!this.isFirebaseAvailable()) {
+      // Silently fail if offline - will be set on next connection
+      console.log('[StorageService] Offline - lastAccessDate will be set when connection restored');
+      return;
+    }
 
-    // Save to Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.setSelectedDay(dayOfWeek);
-      } catch (error) {
-        console.error('Error setting selected day in Firebase:', error);
-      }
+    try {
+      await firebaseService.setLastAccessDate(date);
+    } catch (error) {
+      console.error('Error setting last access date in Firebase:', error);
+      // Don't throw - this is not critical
     }
   }
 
-  // ==================== DATA MIGRATION ====================
+  // ==================== LEGACY OPERATIONS (Kept for compatibility) ====================
 
   /**
-   * Migrate legacy flat structure to day-based structure
-   * Called automatically on initialization
+   * Get all theatres (legacy - now redirects to current day)
+   * @returns {Promise<Array>} Array of theatre objects
+   * @deprecated Use getTheatresForDay instead
    */
-  async migrateToWeeklyStructure() {
-    const oldTheatres = this.loadFromLocalStorage('theatreData', null);
-    const oldPractitioners = this.loadFromLocalStorage('practitionerListData', null);
-    const newExists = this.loadFromLocalStorage('theatresByDay', null);
+  async getTheatres() {
+    const today = getCurrentDayOfWeek();
+    return this.getTheatresForDay(today);
+  }
 
-    // Only migrate if old data exists and new structure doesn't
-    if ((oldTheatres || oldPractitioners) && !newExists) {
-      console.log('Migrating to weekly structure...');
+  /**
+   * Set all theatres (legacy - now redirects to current day)
+   * @param {Array} theatresArray - Array of theatre objects
+   * @returns {Promise<void>}
+   * @deprecated Use setTheatresForDay instead
+   */
+  async setTheatres(theatresArray) {
+    const today = getCurrentDayOfWeek();
+    return this.setTheatresForDay(today, theatresArray);
+  }
 
-      const today = getCurrentDayOfWeek();
-      const theatresByDay = {};
-      const practitionersByDay = {};
+  /**
+   * Get all practitioners (legacy - now redirects to current day)
+   * @returns {Promise<Array>} Array of practitioner objects
+   * @deprecated Use getPractitionersForDay instead
+   */
+  async getPractitioners() {
+    const today = getCurrentDayOfWeek();
+    return this.getPractitionersForDay(today);
+  }
 
-      // Initialize all days
-      getAllDays().forEach(day => {
-        // Assign existing data to current day, empty arrays for others
-        theatresByDay[day] = day === today && oldTheatres ? oldTheatres : [];
-        practitionersByDay[day] = day === today && oldPractitioners ? oldPractitioners : [];
-      });
-
-      // Save new structure
-      this.saveToLocalStorage('theatresByDay', theatresByDay);
-      this.saveToLocalStorage('practitionersByDay', practitionersByDay);
-      this.saveToLocalStorage('selectedDay', today);
-
-      // Backup old data (keep for 7 days in case of rollback)
-      if (oldTheatres) {
-        this.saveToLocalStorage('theatreData_legacy', oldTheatres);
-      }
-      if (oldPractitioners) {
-        this.saveToLocalStorage('practitionerListData_legacy', oldPractitioners);
-      }
-
-      console.log(`Migration complete. Data assigned to ${today}.`);
-    }
+  /**
+   * Set all practitioners (legacy - now redirects to current day)
+   * @param {Array} practitionersArray - Array of practitioner objects
+   * @returns {Promise<void>}
+   * @deprecated Use setPractitionersForDay instead
+   */
+  async setPractitioners(practitionersArray) {
+    const today = getCurrentDayOfWeek();
+    return this.setPractitionersForDay(today, practitionersArray);
   }
 
   // ==================== UTILITY OPERATIONS ====================
@@ -686,48 +522,25 @@ class StorageService {
    * @returns {Promise<Object>} Object with data for the specified day
    */
   async exportDayData(dayOfWeek) {
-    if (this.isFirebaseAvailable()) {
-      try {
-        const theatres = await firebaseService.getTheatresForDay(dayOfWeek);
-        const practitioners = await firebaseService.getPractitionersForDay(dayOfWeek);
-        const rosterDate = await firebaseService.getRosterDateForDay(dayOfWeek);
+    try {
+      const theatres = await firebaseService.getTheatresForDay(dayOfWeek);
+      const practitioners = await firebaseService.getPractitionersForDay(dayOfWeek);
+      const rosterDate = await firebaseService.getRosterDateForDay(dayOfWeek);
+      const theme = await firebaseService.getTheme();
+      const highlightSettings = await firebaseService.getHighlightSettings();
 
-        return {
-          day: dayOfWeek,
-          theatres,
-          practitioners,
-          rosterDate,
-          theme: this.loadFromLocalStorage('theme', 'dark'),
-          highlightSettings: this.loadFromLocalStorage('highlightSettings', {
-            highlightEarlies: true,
-            highlight1730s: true,
-            highlight1830s: true,
-            highlightLates: true
-          })
-        };
-      } catch (error) {
-        console.error(`Error exporting ${dayOfWeek} data from Firebase, using localStorage:`, error);
-      }
+      return {
+        day: dayOfWeek,
+        theatres,
+        practitioners,
+        rosterDate,
+        theme,
+        highlightSettings
+      };
+    } catch (error) {
+      console.error(`Error exporting ${dayOfWeek} data from Firebase:`, error);
+      throw new Error(`Failed to export data for ${dayOfWeek}. Please check your connection.`);
     }
-
-    // Fallback to localStorage
-    const theatresByDay = this.loadFromLocalStorage('theatresByDay', {});
-    const practitionersByDay = this.loadFromLocalStorage('practitionersByDay', {});
-    const rosterDatesByDay = this.loadFromLocalStorage('rosterDatesByDay', {});
-
-    return {
-      day: dayOfWeek,
-      theatres: theatresByDay[dayOfWeek] || [],
-      practitioners: practitionersByDay[dayOfWeek] || [],
-      rosterDate: rosterDatesByDay[dayOfWeek] || null,
-      theme: this.loadFromLocalStorage('theme', 'dark'),
-      highlightSettings: this.loadFromLocalStorage('highlightSettings', {
-        highlightEarlies: true,
-        highlight1730s: true,
-        highlight1830s: true,
-        highlightLates: true
-      })
-    };
   }
 
   /**
@@ -735,97 +548,78 @@ class StorageService {
    * @returns {Promise<Object>} Object with all data
    */
   async exportAllData() {
-    if (this.isFirebaseAvailable()) {
-      try {
-        return await firebaseService.exportAllData();
-      } catch (error) {
-        console.error('Error exporting from Firebase, using localStorage:', error);
-      }
-    }
-
-    // Fallback to localStorage - export day-based structure
-    const theatresByDay = this.loadFromLocalStorage('theatresByDay', null);
-    const practitionersByDay = this.loadFromLocalStorage('practitionersByDay', null);
-
-    // If new structure exists, export it
-    if (theatresByDay && practitionersByDay) {
-      return {
-        theatresByDay,
-        practitionersByDay,
-        rosterDatesByDay: this.loadFromLocalStorage('rosterDatesByDay', {}),
-        theme: this.loadFromLocalStorage('theme', 'dark'),
-        highlightSettings: this.loadFromLocalStorage('highlightSettings', {
-          highlightEarlies: true,
-          highlight1730s: true,
-          highlight1830s: true,
-          highlightLates: true
-        }),
-        selectedDay: this.loadFromLocalStorage('selectedDay', getCurrentDayOfWeek())
+    try {
+      const allData = {
+        theatresByDay: {},
+        practitionersByDay: {},
+        rosterDatesByDay: {},
+        theme: null,
+        highlightSettings: null
       };
-    }
 
-    // Fallback to legacy format if day-based doesn't exist
-    return {
-      theatres: this.loadFromLocalStorage('theatreData', []),
-      practitionerList: this.loadFromLocalStorage('practitionerListData', []),
-      theme: this.loadFromLocalStorage('theme', 'dark'),
-      highlightSettings: this.loadFromLocalStorage('highlightSettings', {
-        highlightEarlies: true,
-        highlight1730s: true,
-        highlight1830s: true,
-        highlightLates: true
-      })
-    };
+      // Get all days
+      const days = getAllDays();
+
+      // Fetch data for each day
+      for (const day of days) {
+        allData.theatresByDay[day] = await firebaseService.getTheatresForDay(day);
+        allData.practitionersByDay[day] = await firebaseService.getPractitionersForDay(day);
+        allData.rosterDatesByDay[day] = await firebaseService.getRosterDateForDay(day);
+      }
+
+      // Get settings
+      allData.theme = await firebaseService.getTheme();
+      allData.highlightSettings = await firebaseService.getHighlightSettings();
+
+      return allData;
+    } catch (error) {
+      console.error('Error exporting all data from Firebase:', error);
+      throw new Error('Failed to export all data. Please check your connection.');
+    }
   }
 
   /**
    * Import all data
-   * @param {Object} data - Data object with theatres and practitionerList (legacy or day-based)
+   * @param {Object} data - Data object with day-based or legacy format
    * @returns {Promise<void>}
    */
   async importAllData(data) {
-    // Handle new day-based format
-    if (data.theatresByDay && data.practitionersByDay) {
-      this.saveToLocalStorage('theatresByDay', data.theatresByDay);
-      this.saveToLocalStorage('practitionersByDay', data.practitionersByDay);
-      if (data.rosterDatesByDay) {
-        this.saveToLocalStorage('rosterDatesByDay', data.rosterDatesByDay);
+    try {
+      // Handle day-based format
+      if (data.theatresByDay && data.practitionersByDay) {
+        const days = Object.keys(data.theatresByDay);
+
+        for (const day of days) {
+          if (data.theatresByDay[day]) {
+            await firebaseService.setTheatresForDay(day, data.theatresByDay[day]);
+          }
+          if (data.practitionersByDay[day]) {
+            await firebaseService.setPractitionersForDay(day, data.practitionersByDay[day]);
+          }
+          if (data.rosterDatesByDay && data.rosterDatesByDay[day]) {
+            await firebaseService.setRosterDateForDay(day, data.rosterDatesByDay[day]);
+          }
+        }
       }
-      if (data.selectedDay) {
-        this.saveToLocalStorage('selectedDay', data.selectedDay);
+      // Handle legacy format - convert to day-based
+      else if (data.theatres && data.practitionerList) {
+        const today = getCurrentDayOfWeek();
+        await firebaseService.setTheatresForDay(today, data.theatres);
+        await firebaseService.setPractitionersForDay(today, data.practitionerList);
       }
-    }
-    // Handle legacy format - convert to day-based
-    else if (data.theatres && data.practitionerList) {
-      const today = getCurrentDayOfWeek();
-      const theatresByDay = {};
-      const practitionersByDay = {};
 
-      getAllDays().forEach(day => {
-        theatresByDay[day] = day === today ? data.theatres : [];
-        practitionersByDay[day] = day === today ? data.practitionerList : [];
-      });
-
-      this.saveToLocalStorage('theatresByDay', theatresByDay);
-      this.saveToLocalStorage('practitionersByDay', practitionersByDay);
-      this.saveToLocalStorage('selectedDay', today);
-    }
-
-    // Save other settings
-    if (data.theme) {
-      this.saveToLocalStorage('theme', data.theme);
-    }
-    if (data.highlightSettings) {
-      this.saveToLocalStorage('highlightSettings', data.highlightSettings);
-    }
-
-    // Try to save to Firebase if available
-    if (this.isFirebaseAvailable()) {
-      try {
-        await firebaseService.importAllData(data);
-      } catch (error) {
-        console.error('Error importing to Firebase:', error);
+      // Import settings
+      if (data.theme) {
+        await firebaseService.setTheme(data.theme);
       }
+      if (data.highlightSettings) {
+        await firebaseService.setHighlightSettings(data.highlightSettings);
+      }
+
+      console.log('[StorageService] Import complete');
+    } catch (error) {
+      console.error('Error importing data to Firebase:', error);
+      throw new Error('Failed to import data. Please check your connection.');
     }
   }
 }
